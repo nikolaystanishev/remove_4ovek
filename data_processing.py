@@ -13,7 +13,7 @@ def get_training(folder):
     images = np.ndarray(shape=(number_of_train_images, image_size,
                                image_size, color_channels),
                         dtype=np.float32)
-    labels = []
+    labels = np.ndarray(number_of_train_images, dtype=np.int32)
     num_images = 0
     image_categories_dir = os.listdir(folder)
     for directory in image_categories_dir:
@@ -29,12 +29,12 @@ def get_training(folder):
                 else:
                     image = image_data
                 images[num_images, :, :, :] = image
+                labels[num_images] = int(directory)
                 num_images = num_images + 1
-                label = int(directory)
-                labels.append(label)
             except OSError as e:
                 pass
     images = images[0:num_images, :, :, :]
+    labels = labels[0:num_images]
     return {'train_data': images, 'train_labels': labels}
 
 
@@ -42,7 +42,7 @@ def get_test(folder):
     images = np.ndarray(shape=(number_of_test_images, image_size,
                                image_size, color_channels),
                         dtype=np.float32)
-    labels = []
+    labels = np.ndarray(number_of_train_images, dtype=np.int32)
     num_images = 0
     image_files = os.listdir(folder)
     images_info = {}
@@ -61,12 +61,12 @@ def get_test(folder):
             else:
                 image = image_data
             images[num_images, :, :, :] = image
+            labels[num_images] = int(images_info[image_filename])
             num_images = num_images + 1
-            label = int(images_info[image_filename])
-            labels.append(label)
         except OSError as e:
             pass
     images = images[0:num_images, :, :, :]
+    labels = labels[0:num_images]
     return {'test_data': images, 'test_labels': labels}
 
 
