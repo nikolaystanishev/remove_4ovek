@@ -5,7 +5,7 @@ from scipy.misc import imresize
 import csv
 import pickle
 from PIL import Image
-import time
+from datetime import datetime
 
 from settings import pixel_depth, color_channels, name_of_info_file
 
@@ -22,7 +22,7 @@ class DataProcessing:
         self.time = None
 
     def pickle_data(self, pickled_name):
-        start_time = time()
+        start_time = datetime.now()
         dataset = {}
         train_data, train_labels =\
             self.get_images_data_from_path(self.train_folder)
@@ -33,7 +33,7 @@ class DataProcessing:
         dataset.update({'test_data': test_data, 'test_labels': test_labels})
         with open(pickled_name, 'wb') as f:
             pickle.dump(dataset, f, pickle.HIGHEST_PROTOCOL)
-        end_time = time()
+        end_time = datetime.now()
         self.time = end_time - start_time
 
     def get_images_data_from_path(self, path):
@@ -108,4 +108,4 @@ class DataProcessing:
 if __name__ == '__main__':
     dp = DataProcessing('./dataset/train_images', './dataset/test_images')
     dp.pickle_data('./dataset/dataset.pickle')
-    print('Taken time: ' + dp.get_time())
+    print('Taken time: {}'.format(str(dp.get_time())))
