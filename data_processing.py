@@ -87,7 +87,8 @@ class DataProcessing:
             tree = ET.parse(annotation)
             root = tree.getroot()
             for child in root:
-                image_name = child.find('image').find('name').text
+                image_name =\
+                    child.find('image').find('name').text.split('/')[1]
                 image_center =\
                     (int(child.find('annorect').find('objpos').find('x').text),
                      int(child.find('annorect').find('objpos').find('y').text))
