@@ -108,11 +108,14 @@ class DataProcessing:
     def get_images_and_labels(self, image_files, images_info):
         images = np.ndarray(shape=(0, self.image_size, self.image_size,
                                    self.color_channels), dtype=np.float32)
-        labels = np.ndarray(0, dtype=np.int32)
+        labels = np.ndarray(shape=(0, 4), dtype=np.int32)
 
         for image_file in image_files:
-            image = self.process_image(image_file)
-            label = int(images_info[os.path.basename(image_file)])
+            image, original_size = self.process_image(image_file)
+
+            image_info = images_info[os.path.basename(image_file)]
+            label = self.process_image_labels(image_info, original_size)
+
             images = np.concatenate((images, image))
             labels = np.append(labels, label)
         return images, labels
@@ -120,13 +123,31 @@ class DataProcessing:
     def process_image(self, image_file):
         image_data = (ndimage.imread(image_file).astype(float) -
                       (self.pixel_depth / 2)) / self.pixel_depth
-        if image_data.shape != (self.image_size, self.image_size):
+
+        original_size = image_data.shape
+
+        if len(image_data.shape) == 2:
+            image_data = np.stack((image_data,) * 3)
+
+        if image_data.shape != (self.image_size, self.image_size,
+                                self.color_channels):
             image = imresize(image_data, size=(self.image_size,
                                                self.image_size))
         else:
             image = image_data
         image = np.expand_dims(image, axis=0)
-        return image
+        return (image, original_size)
+
+    def process_image_labels(self, annotation, original_size):
+        center_x = annotation[0][0] / original_size[0]
+        center_y = annotation[0][1] / original_size[1]
+
+        center_w =\
+            (annotation[1][1][0] - annotation[1][0][0]) / original_size[0]
+        center_h =\
+            (annotation[1][1][1] - annotation[1][0][1]) / original_size[1]
+
+        return (center_x, center_y, center_w, center_h)
 
     def get_average_image_size(self, path):
         resolutions = []
