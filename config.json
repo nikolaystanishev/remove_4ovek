@@ -1,0 +1,33 @@
+{
+    "dataset": {
+        "dataset_images": {
+            "train_folder": "./dataset/one_not_crop/cvpr10_multiview_pedestrians/train",
+            "validation_folder": "./dataset/one_not_crop/cvpr10_multiview_pedestrians/validation",
+            "test_folder": "./dataset/one_not_crop/cvpr10_multiview_pedestrians/test"
+        },
+        "dataset_annotations": {
+            "train_annotations": [
+                "./dataset/one_not_crop/cvpr10_multiview_pedestrians/viewpoints_train1.al",
+                "./dataset/one_not_crop/cvpr10_multiview_pedestrians/viewpoints_train2.al",
+                "./dataset/one_not_crop/cvpr10_multiview_pedestrians/viewpoints_train3.al",
+                "./dataset/one_not_crop/cvpr10_multiview_pedestrians/viewpoints_train4.al",
+                "./dataset/one_not_crop/cvpr10_multiview_pedestrians/viewpoints_train5.al",
+                "./dataset/one_not_crop/cvpr10_multiview_pedestrians/viewpoints_train6.al",
+                "./dataset/one_not_crop/cvpr10_multiview_pedestrians/viewpoints_train7.al",
+                "./dataset/one_not_crop/cvpr10_multiview_pedestrians/viewpoints_train8.al"
+            ],
+            "validation_annotations": [
+                "./dataset/one_not_crop/cvpr10_multiview_pedestrians/viewpoints_validate.al"
+            ],
+            "test_annotations": [
+                "./dataset/one_not_crop/cvpr10_multiview_pedestrians/viewpoints_test.al"
+            ]
+        }
+    },
+
+    "image_info": {
+        "image_size": 272,
+        "pixel_depth": 255.0,
+        "color_channels": 3
+    }
+}
