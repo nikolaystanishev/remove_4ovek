@@ -61,19 +61,20 @@ class DataProcessing:
         train_data, train_labels =\
             self.get_images_data_from_path(self.train_folder,
                                            self.train_annotations)
-        return ({train_data: train_labels})
+        return ({'train_data': train_data, 'train_labels': train_labels})
 
     def get_validation(self):
         validation_data, validation_labels =\
             self.get_images_data_from_path(self.validation_folder,
                                            self.validation_annotations)
-        return ({validation_data: validation_labels})
+        return ({'validation_data': validation_data,
+                 'validation_labels': validation_labels})
 
     def get_test(self):
         test_data, test_labels =\
             self.get_images_data_from_path(self.test_folder,
                                            self.test_annotations)
-        return ({test_data: test_labels})
+        return ({'test_data': test_data, 'test_labels': test_labels})
 
     def get_images_data_from_path(self, path, annotations):
         images = np.ndarray(shape=(0, self.image_size, self.image_size,
