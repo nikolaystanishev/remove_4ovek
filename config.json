@@ -22,7 +22,8 @@
             "test_annotations": [
                 "./dataset/one_not_crop/cvpr10_multiview_pedestrians/viewpoints_test.al"
             ]
-        }
+        },
+        "pickle_name": "./dataset/dataset.pickle"
     },
 
     "image_info": {

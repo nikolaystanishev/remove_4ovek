@@ -31,14 +31,16 @@ class DataProcessing:
         self.pixel_depth = config['image_info']['pixel_depth']
         self.color_channels = config['image_info']['color_channels']
 
+        self.pickle_name = config['dataset']['pickle_name']
+
         self.time = None
 
-    def pickle_data(self, pickled_name):
+    def pickle_data(self):
         start_time = datetime.now()
 
         dataset = self.get_dataset()
 
-        with open(pickled_name, 'wb') as f:
+        with open(self.pickle_name, 'wb') as f:
             pickle.dump(dataset, f, pickle.HIGHEST_PROTOCOL)
 
         end_time = datetime.now()
@@ -180,6 +182,6 @@ if __name__ == '__main__':
         config = json.load(config_file)
 
     dp = DataProcessing(config)
-    dp.pickle_data('./dataset/dataset.pickle')
+    dp.pickle_data()
 
     print('Taken time: {}'.format(str(dp.get_time())))
