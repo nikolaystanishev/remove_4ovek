@@ -47,23 +47,33 @@ class DataProcessing:
     def get_dataset(self):
         dataset = {}
 
+        train_data = self.get_train()
+        validation_data = self.get_validation()
+        test_data = self.get_test()
+
+        dataset.update(train_data)
+        dataset.update(validation_data)
+        dataset.update(test_data)
+
+        return dataset
+
+    def get_train(self):
         train_data, train_labels =\
             self.get_images_data_from_path(self.train_folder,
                                            self.train_annotations)
+        return ({train_data: train_labels})
+
+    def get_validation(self):
         validation_data, validation_labels =\
             self.get_images_data_from_path(self.validation_folder,
                                            self.validation_annotations)
+        return ({validation_data: validation_labels})
+
+    def get_test(self):
         test_data, test_labels =\
             self.get_images_data_from_path(self.test_folder,
                                            self.test_annotations)
-
-        dataset.update({'train_data': train_data,
-                        'train_labels': train_labels})
-        dataset.update({'validation_data': validation_data,
-                        'validation_labels': validation_labels})
-        dataset.update({'test_data': test_data, 'test_labels': test_labels})
-
-        return dataset
+        return ({test_data: test_labels})
 
     def get_images_data_from_path(self, path, annotations):
         images = np.ndarray(shape=(0, self.image_size, self.image_size,
