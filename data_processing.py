@@ -35,16 +35,34 @@ class DataProcessing:
 
         self.time = None
 
-    def pickle_data(self):
+    def pickle_dataset(self):
         start_time = datetime.now()
 
-        dataset = self.get_dataset()
+        self.create_pickle()
 
-        with open(self.pickle_name, 'wb') as f:
-            pickle.dump(dataset, f, pickle.HIGHEST_PROTOCOL)
+        for train_data in self.get_train():
+            self.update_pickle(train_data)
+
+        validation_data = self.get_validation()
+        self.update_pickle(validation_data)
+
+        test_data = self.get_test()
+        self.update_pickle(test_data)
 
         end_time = datetime.now()
         self.time = end_time - start_time
+
+    def create_pickle(self):
+        with open(self.pickle_name, 'wb') as f:
+            pickle.dump({}, f, pickle.HIGHEST_PROTOCOL)
+
+    def update_pickle(self, data):
+        with open(self.pickle_name, 'rb') as f:
+            dataset = pickle.load(f)
+            dataset.update(data)
+
+        with open(self.pickle_name, 'wb') as f:
+            pickle.dump(dataset, f, pickle.HIGHEST_PROTOCOL)
 
     def get_dataset(self):
         dataset = {}
@@ -60,23 +78,32 @@ class DataProcessing:
         return dataset
 
     def get_train(self):
-        train_data, train_labels =\
-            self.get_images_data_from_path(self.train_folder,
-                                           self.train_annotations)
-        return ({'train_data': train_data, 'train_labels': train_labels})
+        for annotation in self.train_annotations:
+            train_data, train_labels = self.process_annotation(annotation)
+            yield ({'train_data': train_data, 'train_labels': train_labels})
 
     def get_validation(self):
         validation_data, validation_labels =\
-            self.get_images_data_from_path(self.validation_folder,
-                                           self.validation_annotations)
+            self.process_annotation(self.validation_annotations)
         return ({'validation_data': validation_data,
                  'validation_labels': validation_labels})
 
     def get_test(self):
-        test_data, test_labels =\
-            self.get_images_data_from_path(self.test_folder,
-                                           self.test_annotations)
+        test_data, test_labels = self.process_annotation(self.test_annotations)
         return ({'test_data': test_data, 'test_labels': test_labels})
+
+    def process_annotation(self, annotation):
+        images, labels = self.get_segment(annotation)
+
+        return images, labels
+
+    def get_segment(self, annotation):
+        images_info = self.get_info_for_images(annotation)
+        image_files = self.get_images_path_from_images_info(images_info)
+        images, labels =\
+            self.get_images_and_labels(image_files, images_info)
+
+        return images, labels
 
     def get_images_data_from_path(self, path, annotations):
         images = np.ndarray(shape=(0, self.image_size, self.image_size,
@@ -116,6 +143,11 @@ class DataProcessing:
     def get_images_files_path(self, dirpath, filenames):
         image_files = map(lambda filename: os.path.join(dirpath, filename),
                           filenames)
+        return image_files
+
+    def get_images_path_from_images_info(self, images_info):
+        image_files = [image_path for image_path, _ in images_info]
+
         return image_files
 
     def get_images_and_labels(self, image_files, images_info):
@@ -182,6 +214,6 @@ if __name__ == '__main__':
         config = json.load(config_file)
 
     dp = DataProcessing(config)
-    dp.pickle_data()
+    dp.pickle_dataset()
 
     print('Taken time: {}'.format(str(dp.get_time())))
