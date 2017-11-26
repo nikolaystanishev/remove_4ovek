@@ -2,6 +2,7 @@
     "dataset": {
         "url": "http://datasets.d2.mpi-inf.mpg.de/andriluka_cvpr10/cvpr10_multiview_pedestrians.tar.gz",
         "path": "./dataset",
+        "folder": "./dataset/one_not_crop/cvpr10_multiview_pedestrians",
         "dataset_images": {
             "train_folder": "./dataset/one_not_crop/cvpr10_multiview_pedestrians/train",
             "validation_folder": "./dataset/one_not_crop/cvpr10_multiview_pedestrians/validation",

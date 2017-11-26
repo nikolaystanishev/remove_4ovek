@@ -27,6 +27,8 @@ class DataProcessing:
         self.test_annotations =\
             config['dataset']['dataset_annotations']['train_annotations']
 
+        self.dataset_folder = config['dataset']['folder']
+
         self.image_size = config['image_info']['image_size']
         self.pixel_depth = config['image_info']['pixel_depth']
         self.color_channels = config['image_info']['color_channels']
@@ -98,8 +100,7 @@ class DataProcessing:
         tree = ET.parse(annotation)
         root = tree.getroot()
         for child in root:
-            image_name =\
-                child.find('image').find('name').text.split('/')[1]
+            image_name = child.find('image').find('name').text
             image_center =\
                 (int(child.find('annorect').find('objpos').find('x').text),
                  int(child.find('annorect').find('objpos').find('y').text))
@@ -112,7 +113,7 @@ class DataProcessing:
         return images_info
 
     def get_images_path_from_images_info(self, images_info):
-        image_files = [image_path for image_path, _ in images_info]
+        image_files = [image_path for image_path, _ in images_info.items()]
 
         return image_files
 
@@ -122,9 +123,11 @@ class DataProcessing:
         labels = np.ndarray(shape=(0, 4), dtype=np.int32)
 
         for image_file in image_files:
-            image, original_size = self.process_image(image_file)
+            image, original_size =\
+                self.process_image(os.path.join(self.dataset_folder,
+                                                image_file))
 
-            image_info = images_info[os.path.basename(image_file)]
+            image_info = images_info[image_file]
             label = self.process_image_labels(image_info, original_size)
 
             images = np.concatenate((images, image))
