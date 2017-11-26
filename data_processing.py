@@ -106,13 +106,17 @@ class DataProcessing:
         root = tree.getroot()
         for child in root:
             image_name = child.find('image').find('name').text
-            image_center =\
-                (int(child.find('annorect').find('objpos').find('x').text),
-                 int(child.find('annorect').find('objpos').find('y').text))
             image_rect = ((int(child.find('annorect').find('x1').text),
                            int(child.find('annorect').find('y1').text)),
                           (int(child.find('annorect').find('x2').text),
                            int(child.find('annorect').find('y2').text)))
+            try:
+                image_center =\
+                    (int(child.find('annorect').find('objpos').find('x').text),
+                     int(child.find('annorect').find('objpos').find('y').text))
+            except AttributeError as e:
+                image_center = ((image_rect[1][0] - image_rect[0][0]),
+                                (image_rect[1][1] - image_rect[0][1]))
             images_info[image_name] = (image_center, image_rect)
 
         return images_info
