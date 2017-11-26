@@ -120,23 +120,22 @@ class DataProcessing:
                 labels = np.append(labels, labels_segment)
         return images, labels
 
-    def get_info_for_images(self, annotations):
+    def get_info_for_images(self, annotation):
         images_info = {}
 
-        for annotation in annotations:
-            tree = ET.parse(annotation)
-            root = tree.getroot()
-            for child in root:
-                image_name =\
-                    child.find('image').find('name').text.split('/')[1]
-                image_center =\
-                    (int(child.find('annorect').find('objpos').find('x').text),
-                     int(child.find('annorect').find('objpos').find('y').text))
-                image_rect = ((int(child.find('annorect').find('x1').text),
-                               int(child.find('annorect').find('y1').text)),
-                              (int(child.find('annorect').find('x2').text),
-                               int(child.find('annorect').find('y2').text)))
-                images_info[image_name] = (image_center, image_rect)
+        tree = ET.parse(annotation)
+        root = tree.getroot()
+        for child in root:
+            image_name =\
+                child.find('image').find('name').text.split('/')[1]
+            image_center =\
+                (int(child.find('annorect').find('objpos').find('x').text),
+                 int(child.find('annorect').find('objpos').find('y').text))
+            image_rect = ((int(child.find('annorect').find('x1').text),
+                           int(child.find('annorect').find('y1').text)),
+                          (int(child.find('annorect').find('x2').text),
+                           int(child.find('annorect').find('y2').text)))
+            images_info[image_name] = (image_center, image_rect)
 
         return images_info
 
