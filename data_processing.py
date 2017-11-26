@@ -64,19 +64,6 @@ class DataProcessing:
         with open(self.pickle_name, 'wb') as f:
             pickle.dump(dataset, f, pickle.HIGHEST_PROTOCOL)
 
-    def get_dataset(self):
-        dataset = {}
-
-        train_data = self.get_train()
-        validation_data = self.get_validation()
-        test_data = self.get_test()
-
-        dataset.update(train_data)
-        dataset.update(validation_data)
-        dataset.update(test_data)
-
-        return dataset
-
     def get_train(self):
         for annotation in self.train_annotations:
             train_data, train_labels = self.process_annotation(annotation)
@@ -105,21 +92,6 @@ class DataProcessing:
 
         return images, labels
 
-    def get_images_data_from_path(self, path, annotations):
-        images = np.ndarray(shape=(0, self.image_size, self.image_size,
-                                   self.color_channels), dtype=np.float32)
-        labels = np.ndarray(0, dtype=np.int32)
-
-        for dirpath, dirnames, filenames in os.walk(path):
-            if not dirnames:
-                images_info = self.get_info_for_images(annotations)
-                image_files = self.get_images_files_path(dirpath, filenames)
-                images_segment, labels_segment =\
-                    self.get_images_and_labels(image_files, images_info)
-                images = np.concatenate((images, images_segment))
-                labels = np.append(labels, labels_segment)
-        return images, labels
-
     def get_info_for_images(self, annotation):
         images_info = {}
 
@@ -138,11 +110,6 @@ class DataProcessing:
             images_info[image_name] = (image_center, image_rect)
 
         return images_info
-
-    def get_images_files_path(self, dirpath, filenames):
-        image_files = map(lambda filename: os.path.join(dirpath, filename),
-                          filenames)
-        return image_files
 
     def get_images_path_from_images_info(self, images_info):
         image_files = [image_path for image_path, _ in images_info]
