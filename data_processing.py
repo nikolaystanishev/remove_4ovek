@@ -25,7 +25,7 @@ class DataProcessing:
         self.validation_annotations =\
             config['dataset']['dataset_annotations']['validation_annotations']
         self.test_annotations =\
-            config['dataset']['dataset_annotations']['train_annotations']
+            config['dataset']['dataset_annotations']['test_annotations']
 
         self.dataset_folder = config['dataset']['folder']
 
@@ -59,12 +59,14 @@ class DataProcessing:
             pickle.dump({}, f, pickle.HIGHEST_PROTOCOL)
 
     def update_pickle(self, data):
+        print('\n+')
         with open(self.pickle_name, 'rb') as f:
             dataset = pickle.load(f)
             dataset.update(data)
 
         with open(self.pickle_name, 'wb') as f:
             pickle.dump(dataset, f, pickle.HIGHEST_PROTOCOL)
+        print('\\/')
 
     def get_train(self):
         for annotation in self.train_annotations:
@@ -72,16 +74,19 @@ class DataProcessing:
             yield ({'train_data': train_data, 'train_labels': train_labels})
 
     def get_validation(self):
-        validation_data, validation_labels =\
-            self.process_annotation(self.validation_annotations)
-        return ({'validation_data': validation_data,
-                 'validation_labels': validation_labels})
+        for annotation in self.validation_annotations:
+            validation_data, validation_labels =\
+                self.process_annotation(annotation)
+            yield ({'validation_data': validation_data,
+                    'validation_labels': validation_labels})
 
     def get_test(self):
-        test_data, test_labels = self.process_annotation(self.test_annotations)
-        return ({'test_data': test_data, 'test_labels': test_labels})
+        for annotation in self.test_annotations:
+            test_data, test_labels = self.process_annotation(annotation)
+            yield ({'test_data': test_data, 'test_labels': test_labels})
 
     def process_annotation(self, annotation):
+        print("*")
         images, labels = self.get_segment(annotation)
 
         return images, labels
@@ -123,6 +128,7 @@ class DataProcessing:
         labels = np.ndarray(shape=(0, 4), dtype=np.int32)
 
         for image_file in image_files:
+            print(".", end='')
             image, original_size =\
                 self.process_image(os.path.join(self.dataset_folder,
                                                 image_file))
