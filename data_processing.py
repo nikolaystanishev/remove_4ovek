@@ -45,11 +45,11 @@ class DataProcessing:
         for train_data in self.get_train():
             self.update_pickle(train_data)
 
-        validation_data = self.get_validation()
-        self.update_pickle(validation_data)
+        for validation_data in self.get_validation():
+            self.update_pickle(validation_data)
 
-        test_data = self.get_test()
-        self.update_pickle(test_data)
+        for test_data in self.get_test():
+            self.update_pickle(test_data)
 
         end_time = datetime.now()
         self.time = end_time - start_time
