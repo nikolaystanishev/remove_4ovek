@@ -56,13 +56,27 @@ class DataProcessing:
 
     def create_pickle(self):
         with open(self.pickle_name, 'wb') as f:
-            pickle.dump({}, f, pickle.HIGHEST_PROTOCOL)
+            dataset_template =\
+                {'train_data':
+                    np.ndarray(shape=(0, self.image_size, self.image_size,
+                                      self.color_channels), dtype=np.float32),
+                 'train_labels': np.ndarray(shape=(0, 4), dtype=np.int32),
+                 'validation_data':
+                    np.ndarray(shape=(0, self.image_size, self.image_size,
+                                      self.color_channels), dtype=np.float32),
+                 'validation_labels': np.ndarray(shape=(0, 4), dtype=np.int32),
+                 'test_data':
+                    np.ndarray(shape=(0, self.image_size, self.image_size,
+                                      self.color_channels), dtype=np.float32),
+                 'test_labels': np.ndarray(shape=(0, 4), dtype=np.int32)}
+            pickle.dump(dataset_template, f, pickle.HIGHEST_PROTOCOL)
 
     def update_pickle(self, data):
         print('\n+')
         with open(self.pickle_name, 'rb') as f:
             dataset = pickle.load(f)
-            dataset.update(data)
+            for k, v in data.items():
+                dataset[k] = np.concatenate((dataset[k], v))
 
         with open(self.pickle_name, 'wb') as f:
             pickle.dump(dataset, f, pickle.HIGHEST_PROTOCOL)
