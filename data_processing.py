@@ -141,7 +141,7 @@ class DataProcessing:
             label = self.process_image_labels(image_info, original_size)
 
             images = np.concatenate((images, image))
-            labels = np.append(labels, label)
+            labels = np.concatenate((labels, label))
         return images, labels
 
     def process_image(self, image_file):
@@ -171,7 +171,7 @@ class DataProcessing:
         center_h =\
             (annotation[1][1][1] - annotation[1][0][1]) / original_size[1]
 
-        return (center_x, center_y, center_w, center_h)
+        return np.array([center_x, center_y, center_w, center_h], ndmin=2)
 
     def get_average_image_size(self, path):
         resolutions = []
