@@ -33,7 +33,10 @@ class DataProcessing:
         self.pixel_depth = config['image_info']['pixel_depth']
         self.color_channels = config['image_info']['color_channels']
 
-        self.pickle_name = config['dataset']['pickle_name']
+        self.train_pickle_name = config['dataset']['pickle_name']['train']
+        self.validation_pickle_name =\
+            config['dataset']['pickle_name']['validation']
+        self.test_pickle_name = config['dataset']['pickle_name']['test']
 
         self.time = None
 
@@ -42,62 +45,62 @@ class DataProcessing:
 
         self.create_pickle()
 
-        for train_data in self.get_train():
-            self.update_pickle(train_data)
-
-        for validation_data in self.get_validation():
-            self.update_pickle(validation_data)
-
-        for test_data in self.get_test():
-            self.update_pickle(test_data)
+        self.generate_dataset()
 
         end_time = datetime.now()
         self.time = end_time - start_time
 
     def create_pickle(self):
-        with open(self.pickle_name, 'wb') as f:
+        self.write_start_values(self.train_pickle_name)
+        self.write_start_values(self.validation_pickle_name)
+        self.write_start_values(self.test_pickle_name)
+
+    def write_start_values(self, pickle_file):
+        with open(pickle_file, 'wb') as f:
             dataset_template =\
-                {'train_data':
+                {'data':
                     np.ndarray(shape=(0, self.image_size, self.image_size,
                                       self.color_channels), dtype=np.float32),
-                 'train_labels': np.ndarray(shape=(0, 4), dtype=np.int32),
-                 'validation_data':
-                    np.ndarray(shape=(0, self.image_size, self.image_size,
-                                      self.color_channels), dtype=np.float32),
-                 'validation_labels': np.ndarray(shape=(0, 4), dtype=np.int32),
-                 'test_data':
-                    np.ndarray(shape=(0, self.image_size, self.image_size,
-                                      self.color_channels), dtype=np.float32),
-                 'test_labels': np.ndarray(shape=(0, 4), dtype=np.int32)}
+                 'labels': np.ndarray(shape=(0, 4), dtype=np.int32)}
             pickle.dump(dataset_template, f, pickle.HIGHEST_PROTOCOL)
 
-    def update_pickle(self, data):
+    def generate_dataset(self):
+        for train_data in self.get_train():
+            self.update_pickle(self.train_pickle_name, train_data)
+
+        for validation_data in self.get_validation():
+            self.update_pickle(self.validation_pickle_name, validation_data)
+
+        for test_data in self.get_test():
+            self.update_pickle(self.test_pickle_name, test_data)
+
+    def update_pickle(self, pickle_file, data):
         print('\n+')
-        with open(self.pickle_name, 'rb') as f:
+        with open(pickle_file, 'rb') as f:
             dataset = pickle.load(f)
             for k, v in data.items():
                 dataset[k] = np.concatenate((dataset[k], v))
 
-        with open(self.pickle_name, 'wb') as f:
+        with open(pickle_file, 'wb') as f:
             pickle.dump(dataset, f, pickle.HIGHEST_PROTOCOL)
         print('\\/')
 
     def get_train(self):
         for annotation in self.train_annotations:
             train_data, train_labels = self.process_annotation(annotation)
-            yield ({'train_data': train_data, 'train_labels': train_labels})
+            yield ({'data': train_data, 'labels': train_labels})
 
     def get_validation(self):
         for annotation in self.validation_annotations:
             validation_data, validation_labels =\
                 self.process_annotation(annotation)
-            yield ({'validation_data': validation_data,
-                    'validation_labels': validation_labels})
+            yield ({'data': validation_data,
+                    'labels': validation_labels})
 
     def get_test(self):
         for annotation in self.test_annotations:
             test_data, test_labels = self.process_annotation(annotation)
-            yield ({'test_data': test_data, 'test_labels': test_labels})
+            yield ({'data': test_data, 'labels': test_labels})
 
     def process_annotation(self, annotation):
         print("*")

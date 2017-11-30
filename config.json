@@ -26,7 +26,11 @@
                 "./dataset/one_not_crop/cvpr10_multiview_pedestrians/viewpoints_test.al"
             ]
         },
-        "pickle_name": "./dataset/dataset.pickle"
+        "pickle_name": {
+            "train": "./dataset/train_data.pickle",
+            "validation": "./dataset/validation_data.pickle",
+            "test": "./dataset/test_data.pickle"
+        }
     },
 
     "image_info": {
