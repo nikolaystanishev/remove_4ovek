@@ -38,6 +38,11 @@ class DataProcessing:
             config['dataset']['pickle_name']['validation']
         self.test_pickle_name = config['dataset']['pickle_name']['test']
 
+        self.grid_size = config['label_info']['grid_size']
+        self.number_of_classes = config['label_info']['number_of_classes']
+        self.number_of_annotations =\
+            config['label_info']['number_of_annotations']
+
         self.time = None
 
     def pickle_dataset(self):
@@ -61,7 +66,10 @@ class DataProcessing:
                 {'data':
                     np.ndarray(shape=(0, self.image_size, self.image_size,
                                       self.color_channels), dtype=np.float32),
-                 'labels': np.ndarray(shape=(0, 4), dtype=np.int32)}
+                 'labels': np.ndarray(shape=(0, self.grid_size, self.grid_size,
+                                             (1 + self.number_of_annotations +
+                                              self.number_of_classes)),
+                                      dtype=np.int32)}
             pickle.dump(dataset_template, f, pickle.HIGHEST_PROTOCOL)
 
     def generate_dataset(self):
@@ -123,20 +131,32 @@ class DataProcessing:
         root = tree.getroot()
         for child in root:
             image_name = child.find('image').find('name').text
-            image_rect = ((int(child.find('annorect').find('x1').text),
-                           int(child.find('annorect').find('y1').text)),
-                          (int(child.find('annorect').find('x2').text),
-                           int(child.find('annorect').find('y2').text)))
+
+            images_info[image_name] = self.get_image_info_for_one_image(child)
+
+        return images_info
+
+    def get_image_info_for_one_image(self, xml_tag):
+        image_info = []
+
+        for image_rect in xml_tag.iter('annorect'):
+            image_rect = ((int(xml_tag.find('annorect').find('x1').text),
+                           int(xml_tag.find('annorect').find('y1').text)),
+                          (int(xml_tag.find('annorect').find('x2').text),
+                           int(xml_tag.find('annorect').find('y2').text)))
+
             try:
                 image_center =\
-                    (int(child.find('annorect').find('objpos').find('x').text),
-                     int(child.find('annorect').find('objpos').find('y').text))
+                    (int(xml_tag.find('annorect')
+                                .find('objpos').find('x').text),
+                     int(xml_tag.find('annorect')
+                                .find('objpos').find('y').text))
             except AttributeError as e:
                 image_center = ((image_rect[1][0] - image_rect[0][0]),
                                 (image_rect[1][1] - image_rect[0][1]))
-            images_info[image_name] = (image_center, image_rect)
+            image_info.append([image_center, image_rect])
 
-        return images_info
+        return image_info
 
     def get_images_path_from_images_info(self, images_info):
         image_files = [image_path for image_path, _ in images_info.items()]
@@ -146,7 +166,9 @@ class DataProcessing:
     def get_images_and_labels(self, image_files, images_info):
         images = np.ndarray(shape=(0, self.image_size, self.image_size,
                                    self.color_channels), dtype=np.float32)
-        labels = np.ndarray(shape=(0, 4), dtype=np.int32)
+        labels = np.ndarray(shape=(0, self.grid_size, self.grid_size,
+                                   (1 + self.number_of_annotations +
+                                    self.number_of_classes)), dtype=np.int32)
 
         for image_file in image_files:
             print(".", end='')
@@ -165,10 +187,10 @@ class DataProcessing:
         image_data = (ndimage.imread(image_file).astype(float) -
                       (self.pixel_depth / 2)) / self.pixel_depth
 
-        original_size = image_data.shape
-
         if len(image_data.shape) == 2:
-            image_data = np.stack((image_data,) * 3)
+            image_data = np.repeat(image_data[:, :, np.newaxis], 3, axis=2)
+
+        original_size = image_data.shape[:-1][::-1]
 
         if image_data.shape != (self.image_size, self.image_size,
                                 self.color_channels):
@@ -176,10 +198,26 @@ class DataProcessing:
                                                self.image_size))
         else:
             image = image_data
+
         image = np.expand_dims(image, axis=0)
         return (image, original_size)
 
-    def process_image_labels(self, annotation, original_size):
+    def process_image_labels(self, annotations, original_size):
+        label = np.zeros((self.grid_size, self.grid_size,
+                          (1 + self.number_of_annotations +
+                           self.number_of_classes)))
+
+        for annotation in annotations:
+            box, grid_x, grid_y =\
+                self.process_label_annotation(annotation, original_size)
+
+            label[grid_x, grid_y, 0:4] = box
+            label[grid_x, grid_y, 4] = 1
+            label[grid_x, grid_y, 5] = 1
+
+        return np.array(label, ndmin=4)
+
+    def process_label_annotation(self, annotation, original_size):
         center_x = annotation[0][0] / original_size[0]
         center_y = annotation[0][1] / original_size[1]
 
@@ -188,7 +226,12 @@ class DataProcessing:
         center_h =\
             (annotation[1][1][1] - annotation[1][0][1]) / original_size[1]
 
-        return np.array([center_x, center_y, center_w, center_h], ndmin=2)
+        box = np.array([center_x, center_y, center_w, center_h], ndmin=2)
+
+        grid_x = int(center_x * self.grid_size)
+        grid_y = int(center_y * self.grid_size)
+
+        return box, grid_x, grid_y
 
     def get_average_image_size(self, path):
         resolutions = []

@@ -37,5 +37,11 @@
         "image_size": 272,
         "pixel_depth": 255.0,
         "color_channels": 3
+    },
+
+    "label_info": {
+        "grid_size": 17,
+        "number_of_classes": 1,
+        "number_of_annotations": 4
     }
 }
