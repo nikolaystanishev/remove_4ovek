@@ -69,7 +69,7 @@ class DataProcessing:
                  'labels': np.ndarray(shape=(0, self.grid_size, self.grid_size,
                                              (1 + self.number_of_annotations +
                                               self.number_of_classes)),
-                                      dtype=np.int32)}
+                                      dtype=np.float32)}
             pickle.dump(dataset_template, f, pickle.HIGHEST_PROTOCOL)
 
     def generate_dataset(self):
@@ -168,7 +168,7 @@ class DataProcessing:
                                    self.color_channels), dtype=np.float32)
         labels = np.ndarray(shape=(0, self.grid_size, self.grid_size,
                                    (1 + self.number_of_annotations +
-                                    self.number_of_classes)), dtype=np.int32)
+                                    self.number_of_classes)), dtype=np.float32)
 
         for image_file in image_files:
             print(".", end='')
