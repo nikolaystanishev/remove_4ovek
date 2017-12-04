@@ -152,8 +152,10 @@ class DataProcessing:
                      int(xml_tag.find('annorect')
                                 .find('objpos').find('y').text))
             except AttributeError as e:
-                image_center = ((image_rect[1][0] - image_rect[0][0]),
-                                (image_rect[1][1] - image_rect[0][1]))
+                image_center = (((image_rect[1][0] - image_rect[0][0]) / 2 +
+                                 image_rect[0][0]),
+                                (((image_rect[1][1] - image_rect[0][1])) / 2 +
+                                 image_rect[0][1]))
             image_info.append([image_center, image_rect])
 
         return image_info
