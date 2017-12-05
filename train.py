@@ -14,25 +14,40 @@ class Train:
 
         self.network = YOLO(config)
 
-    def train(self):
-        train_data, train_labels, validation_data, validation_labels,\
-            test_data, test_labels = self.load_data()
+        self.train_data = None
+        self.train_labels = None
+        self.validation_data = None
+        self.validation_labels = None
+        self.test_data = None
+        self.test_labels = None
 
-        self.network.train(train_data, train_labels, validation_data,
-                           validation_labels, test_data, test_labels)
+    def train(self):
+        self.network.train(self.train_data, self.train_labels,
+                           self.validation_data, self.validation_labels,
+                           self.test_data, self.test_labels)
+
+    def summary(self):
+        self.network.summary(self.train_data, self.train_labels,
+                             self.validation_data, self.validation_labels,
+                             self.test_data, self.test_labels)
+
+        metrics = self.network.get_metrics()
+        model_structure = self.network.get_model_structure()
+
+        self.print_model_structure(model_structure)
+        self.print_metrics(metrics)
 
     def load_data(self):
         train_pickle_name = self.pickles_name['train']
         validation_pickle_name = self.pickles_name['validation']
         test_pickle_name = self.pickles_name['test']
 
-        train_data, train_labels = self.get_data_from_pickle(train_pickle_name)
-        validation_data, validation_labels =\
+        self.train_data, self.train_labels =\
+            self.get_data_from_pickle(train_pickle_name)
+        self.validation_data, self.validation_labels =\
             self.get_data_from_pickle(validation_pickle_name)
-        test_data, test_labels = self.get_data_from_pickle(test_pickle_name)
-
-        return train_data, train_labels, validation_data, validation_labels,\
-            test_data, test_labels
+        self.test_data, self.test_labels =\
+            self.get_data_from_pickle(test_pickle_name)
 
     def get_data_from_pickle(self, pickle_name):
         with open(pickle_name, 'rb') as dsp:
@@ -42,6 +57,20 @@ class Train:
             del dataset
         return data, labels
 
+    def print_model_structure(model_structure):
+        print('===================================')
+        print(model_structure)
+        print('===================================')
+
+    def print_metrics(metrics):
+        print('===================================')
+        print('Loss: {}'.format(metrics['loss']))
+        print('Accuracy: {}'.format(metrics['accuracy']))
+        print('Precision: {}'.format(metrics['precision']))
+        print('Recall: {}'.format(metrics['recall']))
+        print('F1 Score: {}'.format(metrics['f1_score']))
+        print('===================================')
+
 
 if __name__ == '__main__':
     with open('./config.json') as config_file:
@@ -49,3 +78,4 @@ if __name__ == '__main__':
 
     train = Train(config)
     train.train()
+    train.summary()
