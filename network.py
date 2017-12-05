@@ -22,7 +22,10 @@ class YOLO:
         self.number_of_annotations =\
             config['label_info']['number_of_annotations']
 
-        self. model = self.create_model()
+        self.model = self.create_model()
+
+        self.metrics = None
+        self.model_structure = None
 
     def create_model(self):
         input = Input(shape=(self.image_size, self.image_size,
@@ -137,11 +140,60 @@ class YOLO:
                                  epochs=5, validation_data=test_generator,
                                  validation_steps=320 // 64)
 
-        test_accuracy = self.model.evaluate(test_data, test_labels)
-        train_accuracy = self.model.evaluate(train_data, train_labels)
-        validation_accuracy =\
+    def summary(self, train_data, train_labels, validation_data,
+                validation_labels, test_data, test_labels):
+        self.metrics =\
+            self.genarate_metrics(train_data, train_labels, validation_data,
+                                  validation_labels, test_data, test_labels)
+        self.model_structure = self.genarate_model_structure()
+
+    def genarate_metrics(self, train_data, train_labels, validation_data,
+                         validation_labels, test_data, test_labels):
+        metrics =\
+            self.get_metrics_values(train_data, train_labels, validation_data,
+                                    validation_labels, test_data, test_labels)
+
+        return metrics
+
+    def genarate_model_structure(self):
+        model_structure = []
+        self.model.summary(print_fn=lambda row: model_structure.append(row))
+        model_structure = '\n'.join(model_structure)
+
+        return model_structure
+
+    def get_metrics_values(self, train_data, train_labels, validation_data,
+                           validation_labels, test_data, test_labels):
+        test_metrics = self.model.evaluate(test_data, test_labels)
+        train_metrics = self.model.evaluate(train_data, train_labels)
+        validation_metrics =\
             self.model.evaluate(validation_data, validation_labels)
 
-        print("Test accuracy: {}".format(test_accuracy))
-        print("Train accuracy: {}".format(train_accuracy))
-        print("Validation accuracy: {}".format(validation_accuracy))
+        loss = {'test_loss': test_metrics[0],
+                'train_loss': train_metrics[0],
+                'validation_loss': validation_metrics[0]}
+
+        accuracy = {'test_accuracy': test_metrics[1],
+                    'train_accuracy': train_metrics[1],
+                    'validation_accuracy': validation_metrics[1]}
+
+        precision = {'test_precission': test_metrics[2],
+                     'train_precission': train_metrics[2],
+                     'validation_precission': validation_metrics[2]}
+
+        recall = {'test_recall': test_metrics[3],
+                  'train_recall': train_metrics[3],
+                  'validation_recall': validation_metrics[3]}
+
+        f1_score = {'test_f1_score': test_metrics[4],
+                    'train_f1_score': train_metrics[4],
+                    'validation_f1_score': validation_metrics[4]}
+
+        return {'loss': loss, 'accuracy': accuracy, 'precision': precision,
+                'recall': recall, 'f1_score': f1_score}
+
+    def get_metrics(self):
+        return self.metrics
+
+    def get_model_structure(self):
+        return self.model_structure
