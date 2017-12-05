@@ -2,6 +2,8 @@ from keras.models import Model
 from keras.layers import Input, Conv2D, MaxPooling2D, Reshape
 from keras.preprocessing.image import ImageDataGenerator
 
+from metrics import precision, recall, fmeasure
+
 import tensorflow as tf
 sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
 
@@ -30,8 +32,8 @@ class YOLO:
 
         model = Model(input, network)
         model.compile(optimizer='adam',
-                      loss=self.custom_loss,
-                      metrics=['accuracy'])
+                      loss='mean_squared_error',
+                      metrics=['accuracy', precision, recall, fmeasure])
         model.summary()
         return model
 
