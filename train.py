@@ -21,6 +21,8 @@ class Train:
         self.test_data = None
         self.test_labels = None
 
+        self.results_file_name = config['network']['results_file']
+
     def train(self):
         self.network.train(self.train_data, self.train_labels,
                            self.validation_data, self.validation_labels,
@@ -36,6 +38,60 @@ class Train:
 
         self.print_model_structure(model_structure)
         self.print_metrics(metrics)
+
+    def summary_to_file(self):
+        log_text = self.create_log_text()
+
+        with open(self.results_file_name, 'a') as f:
+            f.write(log_text)
+
+    def create_log_text(self):
+        log_text = ''
+
+        model_structure = self.network.get_model_structure()
+        metrics = self.network.get_metrics()
+
+        log_text += model_structure
+        log_text += """
+        Test Metrics:
+            Loss: {}
+            Accuracy: {}
+            Precision: {}
+            Recall: {}
+            F1 Score: {}
+        ____________________________________________________________
+        Train Metrics:
+            Loss: {}
+            Accuracy: {}
+            Precision: {}
+            Recall: {}
+            F1 Score: {}
+        ____________________________________________________________
+        Validation Metrics:
+            Loss: {}
+            Accuracy: {}
+            Precision: {}
+            Recall: {}
+            F1 Score: {}
+        ____________________________________________________________
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        """.format(metrics['loss']['test_loss'],
+                   metrics['accuracy']['test_accuracy'],
+                   metrics['precision']['test_precision'],
+                   metrics['recall']['test_recall'],
+                   metrics['f1_score']['test_f1_score'],
+                   metrics['loss']['train_loss'],
+                   metrics['accuracy']['train_accuracy'],
+                   metrics['precision']['train_precision'],
+                   metrics['recall']['train_recall'],
+                   metrics['f1_score']['train_f1_score'],
+                   metrics['loss']['validation_loss'],
+                   metrics['accuracy']['validation_accuracy'],
+                   metrics['precision']['validation_precision'],
+                   metrics['recall']['validation_recall'],
+                   metrics['f1_score']['validation_f1_score'])
+
+        return log_text
 
     def load_data(self):
         train_pickle_name = self.pickles_name['train']
@@ -79,3 +135,4 @@ if __name__ == '__main__':
     train = Train(config)
     train.train()
     train.summary()
+    train.summary_to_file()

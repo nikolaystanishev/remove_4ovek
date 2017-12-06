@@ -43,5 +43,9 @@
         "grid_size": 17,
         "number_of_classes": 1,
         "number_of_annotations": 4
+    },
+
+    "network": {
+        "results_file": "./results.txt"
     }
 }
