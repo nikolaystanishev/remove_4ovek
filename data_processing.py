@@ -139,18 +139,16 @@ class DataProcessing:
     def get_image_info_for_one_image(self, xml_tag):
         image_info = []
 
-        for image_rect in xml_tag.iter('annorect'):
-            image_rect = ((int(xml_tag.find('annorect').find('x1').text),
-                           int(xml_tag.find('annorect').find('y1').text)),
-                          (int(xml_tag.find('annorect').find('x2').text),
-                           int(xml_tag.find('annorect').find('y2').text)))
+        for image_rect_points in xml_tag.iter('annorect'):
+            image_rect = ((int(image_rect_points.find('x1').text),
+                           int(image_rect_points.find('y1').text)),
+                          (int(image_rect_points.find('x2').text),
+                           int(image_rect_points.find('y2').text)))
 
             try:
                 image_center =\
-                    (int(xml_tag.find('annorect')
-                                .find('objpos').find('x').text),
-                     int(xml_tag.find('annorect')
-                                .find('objpos').find('y').text))
+                    (int(image_rect_points.find('objpos').find('x').text),
+                     int(image_rect_points.find('objpos').find('y').text))
             except AttributeError as e:
                 image_center = (((image_rect[1][0] - image_rect[0][0]) / 2 +
                                  image_rect[0][0]),
@@ -212,6 +210,11 @@ class DataProcessing:
         for annotation in annotations:
             box, grid_x, grid_y =\
                 self.process_label_annotation(annotation, original_size)
+
+            if grid_x >= 17:
+                grid_x = 16
+            if grid_y >= 17:
+                grid_y = 16
 
             label[grid_x, grid_y, 0:4] = box
             label[grid_x, grid_y, 4] = 1
