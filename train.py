@@ -27,6 +27,7 @@ class Train:
         self.network.train(self.train_data, self.train_labels,
                            self.validation_data, self.validation_labels,
                            self.test_data, self.test_labels)
+        self.network.save_model()
 
     def summary(self):
         self.network.summary(self.train_data, self.train_labels,

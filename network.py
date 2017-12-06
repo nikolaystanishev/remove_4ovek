@@ -1,6 +1,7 @@
 from keras.models import Model
 from keras.layers import Input, Conv2D, MaxPooling2D, Reshape
 from keras.preprocessing.image import ImageDataGenerator
+import pickle
 
 from metrics import precision, recall, fmeasure
 
@@ -26,6 +27,8 @@ class YOLO:
 
         self.metrics = None
         self.model_structure = None
+
+        self.model_pickle_file = config['network']['model_pickle_file']
 
     def create_model(self):
         input = Input(shape=(self.image_size, self.image_size,
@@ -139,6 +142,10 @@ class YOLO:
         self.model.fit_generator(train_generator, steps_per_epoch=4800 // 64,
                                  epochs=5, validation_data=test_generator,
                                  validation_steps=320 // 64)
+
+    def save_model(self):
+        with open(self.model_pickle_file, 'wb') as f:
+            pickle.dump(self.model, f, pickle.HIGHEST_PROTOCOL)
 
     def summary(self, train_data, train_labels, validation_data,
                 validation_labels, test_data, test_labels):

@@ -46,6 +46,7 @@
     },
 
     "network": {
+        "model_pickle_file": "./model.pickle",
         "results_file": "./results.txt"
     }
 }
