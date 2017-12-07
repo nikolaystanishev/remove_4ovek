@@ -147,7 +147,10 @@ class YOLO:
         self.model.save(self.model_pickle_file)
 
     def load_model(self):
-        self.model = load_model(self.model_pickle_file)
+        custom_objects = {"precision": precision, "recall": recall,
+                          "fmeasure": fmeasure}
+        self.model = load_model(self.model_pickle_file,
+                                custom_objects=custom_objects)
 
     def summary(self, train_data, train_labels, validation_data,
                 validation_labels, test_data, test_labels):
