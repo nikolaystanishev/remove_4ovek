@@ -1,5 +1,6 @@
 import pickle
 import json
+from datetime import datetime
 
 from network import YOLO
 
@@ -10,6 +11,8 @@ class Train:
     """
 
     def __init__(self, config):
+        start_time = datetime.now()
+
         self.network = YOLO(config)
 
         self.train_pickle_name = config['dataset']['pickle_name']['train']
@@ -28,15 +31,25 @@ class Train:
 
         self.results_file_name = config['network']['results_file']
 
+        self.train_time = None
+        self.full_time = None
+
         self.train()
+
+        end_time = datetime.now()
+        self.full_time = end_time - start_time
 
         self.summary()
         self.summary_to_file()
 
     def train(self):
+        start_time = datetime.now()
         self.network.train(self.train_data, self.train_labels,
                            self.validation_data, self.validation_labels,
                            self.test_data, self.test_labels)
+        end_time = datetime.now()
+        self.train_time = end_time - start_time
+
         self.network.save_model()
 
     def summary(self):
