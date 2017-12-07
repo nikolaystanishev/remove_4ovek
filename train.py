@@ -28,6 +28,11 @@ class Train:
 
         self.results_file_name = config['network']['results_file']
 
+        self.train()
+
+        self.summary()
+        self.summary_to_file()
+
     def train(self):
         self.network.train(self.train_data, self.train_labels,
                            self.validation_data, self.validation_labels,
@@ -143,6 +148,3 @@ if __name__ == '__main__':
         config = json.load(config_file)
 
     train = Train(config)
-    train.train()
-    train.summary()
-    train.summary_to_file()
