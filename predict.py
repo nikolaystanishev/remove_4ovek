@@ -49,7 +49,7 @@ if __name__ == '__main__':
 
     predict = Predict(config)
 
-    path = './dataset/one_not_crop/cvpr10_multiview_pedestrians/test/00036.png'
+    path = './dataset/cvpr10_multiview_pedestrians/test/00036.png'
 
     prediction = predict.predict(path)
     print(prediction)
