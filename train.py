@@ -54,43 +54,49 @@ class Train:
 
         log_text += model_structure
         log_text += """
-        Test Metrics:
-            Loss: {}
-            Accuracy: {}
-            Precision: {}
-            Recall: {}
-            F1 Score: {}
-        ____________________________________________________________
-        Train Metrics:
-            Loss: {}
-            Accuracy: {}
-            Precision: {}
-            Recall: {}
-            F1 Score: {}
-        ____________________________________________________________
-        Validation Metrics:
-            Loss: {}
-            Accuracy: {}
-            Precision: {}
-            Recall: {}
-            F1 Score: {}
-        ____________________________________________________________
-        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        """.format(metrics['loss']['test_loss'],
-                   metrics['accuracy']['test_accuracy'],
-                   metrics['precision']['test_precision'],
-                   metrics['recall']['test_recall'],
-                   metrics['f1_score']['test_f1_score'],
-                   metrics['loss']['train_loss'],
-                   metrics['accuracy']['train_accuracy'],
-                   metrics['precision']['train_precision'],
-                   metrics['recall']['train_recall'],
-                   metrics['f1_score']['train_f1_score'],
-                   metrics['loss']['validation_loss'],
-                   metrics['accuracy']['validation_accuracy'],
-                   metrics['precision']['validation_precision'],
-                   metrics['recall']['validation_recall'],
-                   metrics['f1_score']['validation_f1_score'])
+Test Metrics:
+    Loss: {}
+    Accuracy: {}
+    Precision: {}
+    Recall: {}
+    F1 Score: {}
+_________________________________________________________________
+Train Metrics:
+    Loss: {}
+    Accuracy: {}
+    Precision: {}
+    Recall: {}
+    F1 Score: {}
+_________________________________________________________________
+Validation Metrics:
+    Loss: {}
+    Accuracy: {}
+    Precision: {}
+    Recall: {}
+    F1 Score: {}
+_________________________________________________________________
+Time:
+    Train Time: {}
+    Full Time: {}
+_________________________________________________________________
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+""".format(metrics['loss']['test_loss'],
+           metrics['accuracy']['test_accuracy'],
+           metrics['precision']['test_precision'],
+           metrics['recall']['test_recall'],
+           metrics['f1_score']['test_f1_score'],
+           metrics['loss']['train_loss'],
+           metrics['accuracy']['train_accuracy'],
+           metrics['precision']['train_precision'],
+           metrics['recall']['train_recall'],
+           metrics['f1_score']['train_f1_score'],
+           metrics['loss']['validation_loss'],
+           metrics['accuracy']['validation_accuracy'],
+           metrics['precision']['validation_precision'],
+           metrics['recall']['validation_recall'],
+           metrics['f1_score']['validation_f1_score'],
+           self.train_time,
+           self.full_time)
 
         return log_text
 
@@ -114,19 +120,21 @@ class Train:
             del dataset
         return data, labels
 
-    def print_model_structure(model_structure):
-        print('===================================')
+    def print_model_structure(self, model_structure):
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
         print(model_structure)
-        print('===================================')
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 
-    def print_metrics(metrics):
-        print('===================================')
+    def print_metrics(self, metrics):
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
         print('Loss: {}'.format(metrics['loss']))
         print('Accuracy: {}'.format(metrics['accuracy']))
         print('Precision: {}'.format(metrics['precision']))
         print('Recall: {}'.format(metrics['recall']))
         print('F1 Score: {}'.format(metrics['f1_score']))
-        print('===================================')
+        print('Train Time: {}'.format(self.train_time))
+        print('Full Time: {}'.format(self.full_time))
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 
 
 if __name__ == '__main__':
