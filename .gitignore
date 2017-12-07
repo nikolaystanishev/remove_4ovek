@@ -102,3 +102,6 @@ ENV/
 
 # dataset
 dataset/
+
+# models
+model/
