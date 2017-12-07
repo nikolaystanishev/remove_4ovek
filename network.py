@@ -28,7 +28,8 @@ class YOLO:
         self.metrics = None
         self.model_structure = None
 
-        self.model_pickle_file = config['network']['model_pickle_file']
+        self.model_binary_data_file =\
+            config['network']['model_binary_data_file']
 
     def create_model(self):
         input = Input(shape=(self.image_size, self.image_size,
@@ -143,13 +144,18 @@ class YOLO:
                                  epochs=5, validation_data=test_generator,
                                  validation_steps=320 // 64)
 
+    def predict(self, image):
+        predict = self.model.predict(image)
+
+        return predict
+
     def save_model(self):
-        self.model.save(self.model_pickle_file)
+        self.model.save(self.model_binary_data_file)
 
     def load_model(self):
         custom_objects = {"precision": precision, "recall": recall,
                           "fmeasure": fmeasure}
-        self.model = load_model(self.model_pickle_file,
+        self.model = load_model(self.model_binary_data_file,
                                 custom_objects=custom_objects)
 
     def summary(self, train_data, train_labels, validation_data,
