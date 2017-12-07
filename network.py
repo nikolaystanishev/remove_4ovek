@@ -1,7 +1,7 @@
 from keras.models import Model
 from keras.layers import Input, Conv2D, MaxPooling2D, Reshape
 from keras.preprocessing.image import ImageDataGenerator
-import pickle
+from keras.models import load_model
 
 from metrics import precision, recall, fmeasure
 
@@ -144,8 +144,10 @@ class YOLO:
                                  validation_steps=320 // 64)
 
     def save_model(self):
-        with open(self.model_pickle_file, 'wb') as f:
-            pickle.dump(self.model, f, pickle.HIGHEST_PROTOCOL)
+        self.model.save(self.model_pickle_file)
+
+    def load_model(self):
+        self.model = load_model(self.model_pickle_file)
 
     def summary(self, train_data, train_labels, validation_data,
                 validation_labels, test_data, test_labels):
@@ -184,9 +186,9 @@ class YOLO:
                     'train_accuracy': train_metrics[1],
                     'validation_accuracy': validation_metrics[1]}
 
-        precision = {'test_precission': test_metrics[2],
-                     'train_precission': train_metrics[2],
-                     'validation_precission': validation_metrics[2]}
+        precision = {'test_precision': test_metrics[2],
+                     'train_precision': train_metrics[2],
+                     'validation_precision': validation_metrics[2]}
 
         recall = {'test_recall': test_metrics[3],
                   'train_recall': train_metrics[3],
