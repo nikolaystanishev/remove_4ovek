@@ -10,9 +10,12 @@ class Train:
     """
 
     def __init__(self, config):
-        self.pickles_name = config['dataset']['pickle_name']
-
         self.network = YOLO(config)
+
+        self.train_pickle_name = config['dataset']['pickle_name']['train']
+        self.validation_pickle_name =\
+            config['dataset']['pickle_name']['validation']
+        self.test_pickle_name = config['dataset']['pickle_name']['test']
 
         self.train_data = None
         self.train_labels = None
@@ -20,6 +23,8 @@ class Train:
         self.validation_labels = None
         self.test_data = None
         self.test_labels = None
+
+        self.load_data()
 
         self.results_file_name = config['network']['results_file']
 
@@ -101,16 +106,12 @@ _________________________________________________________________
         return log_text
 
     def load_data(self):
-        train_pickle_name = self.pickles_name['train']
-        validation_pickle_name = self.pickles_name['validation']
-        test_pickle_name = self.pickles_name['test']
-
         self.train_data, self.train_labels =\
-            self.get_data_from_pickle(train_pickle_name)
+            self.get_data_from_pickle(self.train_pickle_name)
         self.validation_data, self.validation_labels =\
-            self.get_data_from_pickle(validation_pickle_name)
+            self.get_data_from_pickle(self.validation_pickle_name)
         self.test_data, self.test_labels =\
-            self.get_data_from_pickle(test_pickle_name)
+            self.get_data_from_pickle(self.test_pickle_name)
 
     def get_data_from_pickle(self, pickle_name):
         with open(pickle_name, 'rb') as dsp:
