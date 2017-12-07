@@ -9,8 +9,6 @@ from network import YOLO
 class Predict:
 
     def __init__(self, config):
-        self.model_pickle_file = config['network']['model_pickle_file']
-
         self.network = YOLO(config)
         self.network.load_model()
 
