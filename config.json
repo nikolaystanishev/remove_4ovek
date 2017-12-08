@@ -47,6 +47,7 @@
 
     "network": {
         "model_binary_data_file": "./model.h5",
-        "results_file": "./results.txt"
+        "results_file": "./results.txt",
+        "json_model_structure": "./model.json"
     }
 }

@@ -2,6 +2,8 @@ from keras.models import Model
 from keras.layers import Input, Conv2D, MaxPooling2D, Reshape
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import load_model
+from keras.models import model_from_json
+import json
 
 from metrics import precision, recall, fmeasure
 
@@ -30,6 +32,8 @@ class YOLO:
 
         self.model_binary_data_file =\
             config['network']['model_binary_data_file']
+        self.model_json_structure_file =\
+            config['network']['json_model_structure']
 
     def create_model(self):
         input = Input(shape=(self.image_size, self.image_size,
@@ -153,10 +157,26 @@ class YOLO:
         self.model.save(self.model_binary_data_file)
 
     def load_model(self):
-        custom_objects = {"precision": precision, "recall": recall,
-                          "fmeasure": fmeasure}
+        custom_objects = self.get_custom_objects()
         self.model = load_model(self.model_binary_data_file,
                                 custom_objects=custom_objects)
+
+    def save_json_model_structure(self):
+        json_model_structure = self.model.to_json()
+
+        with open(self.model_json_structure_file, 'w') as f:
+            json.dump(json_model_structure, f)
+
+    def load_model_from_json_structure(self):
+        custom_objects = self.get_custom_objects()
+        self.model = model_from_json(self.model_json_structure_file,
+                                     custom_objects=custom_objects)
+
+    def get_custom_objects(self):
+        custom_objects = {"precision": precision, "recall": recall,
+                          "fmeasure": fmeasure}
+
+        return custom_objects
 
     def summary(self, train_data, train_labels, validation_data,
                 validation_labels, test_data, test_labels):

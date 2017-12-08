@@ -51,6 +51,7 @@ class Train:
         self.train_time = end_time - start_time
 
         self.network.save_model()
+        self.network.save_json_model_structure()
 
     def summary(self):
         self.network.summary(self.train_data, self.train_labels,
