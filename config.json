@@ -2,28 +2,28 @@
     "dataset": {
         "url": "http://datasets.d2.mpi-inf.mpg.de/andriluka_cvpr10/cvpr10_multiview_pedestrians.tar.gz",
         "path": "./dataset",
-        "folder": "./dataset/one_not_crop/cvpr10_multiview_pedestrians",
+        "folder": "./dataset/cvpr10_multiview_pedestrians",
         "dataset_images": {
-            "train_folder": "./dataset/one_not_crop/cvpr10_multiview_pedestrians/train",
-            "validation_folder": "./dataset/one_not_crop/cvpr10_multiview_pedestrians/validation",
-            "test_folder": "./dataset/one_not_crop/cvpr10_multiview_pedestrians/test"
+            "train_folder": "./dataset/cvpr10_multiview_pedestrians/train",
+            "validation_folder": "./dataset/cvpr10_multiview_pedestrians/validation",
+            "test_folder": "./dataset/cvpr10_multiview_pedestrians/test"
         },
         "dataset_annotations": {
             "train_annotations": [
-                "./dataset/one_not_crop/cvpr10_multiview_pedestrians/viewpoints_train1.al",
-                "./dataset/one_not_crop/cvpr10_multiview_pedestrians/viewpoints_train2.al",
-                "./dataset/one_not_crop/cvpr10_multiview_pedestrians/viewpoints_train3.al",
-                "./dataset/one_not_crop/cvpr10_multiview_pedestrians/viewpoints_train4.al",
-                "./dataset/one_not_crop/cvpr10_multiview_pedestrians/viewpoints_train5.al",
-                "./dataset/one_not_crop/cvpr10_multiview_pedestrians/viewpoints_train6.al",
-                "./dataset/one_not_crop/cvpr10_multiview_pedestrians/viewpoints_train7.al",
-                "./dataset/one_not_crop/cvpr10_multiview_pedestrians/viewpoints_train8.al"
+                "./dataset/cvpr10_multiview_pedestrians/viewpoints_train1.al",
+                "./dataset/cvpr10_multiview_pedestrians/viewpoints_train2.al",
+                "./dataset/cvpr10_multiview_pedestrians/viewpoints_train3.al",
+                "./dataset/cvpr10_multiview_pedestrians/viewpoints_train4.al",
+                "./dataset/cvpr10_multiview_pedestrians/viewpoints_train5.al",
+                "./dataset/cvpr10_multiview_pedestrians/viewpoints_train6.al",
+                "./dataset/cvpr10_multiview_pedestrians/viewpoints_train7.al",
+                "./dataset/cvpr10_multiview_pedestrians/viewpoints_train8.al"
             ],
             "validation_annotations": [
-                "./dataset/one_not_crop/cvpr10_multiview_pedestrians/viewpoints_validate.al"
+                "./dataset/cvpr10_multiview_pedestrians/viewpoints_validate.al"
             ],
             "test_annotations": [
-                "./dataset/one_not_crop/cvpr10_multiview_pedestrians/viewpoints_test.al"
+                "./dataset/cvpr10_multiview_pedestrians/viewpoints_test.al"
             ]
         },
         "pickle_name": {
