@@ -79,29 +79,29 @@ class Train:
         log_text += model_structure
         log_text += """
 Test Metrics:
-    Loss: {}
-    Accuracy: {}
-    Precision: {}
-    Recall: {}
-    F1 Score: {}
+    Loss       : {}
+    Accuracy   : {}
+    Precision  : {}
+    Recall     : {}
+    F1 Score   : {}
 _________________________________________________________________
 Train Metrics:
-    Loss: {}
-    Accuracy: {}
-    Precision: {}
-    Recall: {}
-    F1 Score: {}
+    Loss       : {}
+    Accuracy   : {}
+    Precision  : {}
+    Recall     : {}
+    F1 Score   : {}
 _________________________________________________________________
 Validation Metrics:
-    Loss: {}
-    Accuracy: {}
-    Precision: {}
-    Recall: {}
-    F1 Score: {}
+    Loss       : {}
+    Accuracy   : {}
+    Precision  : {}
+    Recall     : {}
+    F1 Score   : {}
 _________________________________________________________________
 Time:
-    Train Time: {}
-    Full Time: {}
+    Train Time : {}
+    Full Time  : {}
 _________________________________________________________________
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """.format(metrics['loss']['test_loss'],
