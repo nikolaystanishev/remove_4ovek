@@ -26,6 +26,9 @@ class YOLO:
         self.number_of_annotations =\
             config['label_info']['number_of_annotations']
 
+        self.alpha_coord = config['network']['train']['loss']['alpha_coord']
+        self.alpha_noobj = config['network']['train']['loss']['alpha_noobj']
+
         self.model = self.create_model()
 
         self.metrics = None
@@ -149,8 +152,57 @@ class YOLO:
                                  epochs=5, validation_data=test_generator,
                                  validation_steps=320 // 64)
 
-    def custom_loss(self, y_true, y_pred):
-        loss = np.sum(np.power((y_true - y_pred), 2))
+    def custom_loss(self, true, pred):
+        loss = 0
+
+        true =\
+            tf.reshape(true, shape=(-1, self.grid_size ** 2,
+                                    (self.number_of_annotations + 1 +
+                                     self.number_of_classes)))
+        pred =\
+            tf.reshape(pred, shape=(-1, self.grid_size ** 2,
+                                    (self.number_of_annotations + 1 +
+                                     self.number_of_classes)))
+
+        x_true = true[:, :, 0]
+        x_pred = pred[:, :, 0]
+
+        y_true = true[:, :, 1]
+        y_pred = pred[:, :, 1]
+
+        w_true = true[:, :, 2]
+        w_pred = pred[:, :, 2]
+
+        h_true = true[:, :, 3]
+        h_pred = pred[:, :, 3]
+
+        c_true = true[:, :, 4]
+        c_pred = pred[:, :, 4]
+
+        p_true = true[:, :, 5]
+        p_pred = pred[:, :, 5]
+
+        loss +=\
+            np.sum(
+                tf.scalar_mul(self.alpha_coord,
+                              tf.add(tf.squared_difference(x_true, x_pred),
+                                     tf.squared_difference(y_true, y_pred))))
+
+        loss +=\
+            np.sum(
+                tf.scalar_mul(
+                    self.alpha_coord,
+                    tf.add(tf.squared_difference(tf.sqrt(w_true),
+                                                 tf.sqrt(w_pred)),
+                           tf.squared_difference(tf.sqrt(h_true),
+                                                 tf.sqrt(h_pred)))))
+
+        loss += np.sum(tf.squared_difference(c_true, c_pred))
+
+        loss += np.sum(tf.scalar_mul(self.alpha_noobj,
+                                     tf.squared_difference(c_true, c_pred)))
+
+        loss += np.sum(tf.squared_difference(p_true, p_pred))
 
         return loss
 

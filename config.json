@@ -48,6 +48,12 @@
     "network": {
         "model_binary_data_file": "./model.h5",
         "results_file": "./results.txt",
-        "json_model_structure": "./model.json"
+        "json_model_structure": "./model.json",
+        "train": {
+            "loss": {
+                "alpha_coord": 5,
+                "alpha_noobj": 0.5
+            }
+        }
     }
 }
