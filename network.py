@@ -180,7 +180,8 @@ class YOLO:
 
     def get_custom_objects(self):
         custom_objects = {"precision": precision, "recall": recall,
-                          "fmeasure": fmeasure}
+                          "fmeasure": fmeasure,
+                          "custom_loss": self.custom_loss}
 
         return custom_objects
 
