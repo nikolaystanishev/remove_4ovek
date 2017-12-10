@@ -4,6 +4,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.models import load_model
 from keras.models import model_from_json
 import json
+import numpy as np
 
 from metrics import precision, recall, fmeasure
 
@@ -43,7 +44,7 @@ class YOLO:
 
         model = Model(input, network)
         model.compile(optimizer='adam',
-                      loss='mean_squared_error',
+                      loss=self.custom_loss,
                       metrics=['accuracy', precision, recall, fmeasure])
         model.summary()
         return model
@@ -147,6 +148,11 @@ class YOLO:
         self.model.fit_generator(train_generator, steps_per_epoch=4800 // 64,
                                  epochs=5, validation_data=test_generator,
                                  validation_steps=320 // 64)
+
+    def custom_loss(self, y_true, y_pred):
+        loss = np.sum(np.power((y_true - y_pred), 2))
+
+        return loss
 
     def predict(self, image):
         predict = self.model.predict(image)
