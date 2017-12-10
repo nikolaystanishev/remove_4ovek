@@ -1,6 +1,7 @@
 import pickle
 import json
 from datetime import datetime
+from prettytable import PrettyTable
 
 from network import YOLO
 
@@ -60,8 +61,10 @@ class Train:
 
         metrics = self.network.get_metrics()
         model_structure = self.network.get_model_structure()
+        model_history = self.network.get_model_history()
 
         self.print_model_structure(model_structure)
+        self.print_model_history(model_history)
         self.print_metrics(metrics)
 
     def summary_to_file(self):
@@ -75,8 +78,19 @@ class Train:
 
         model_structure = self.network.get_model_structure()
         metrics = self.network.get_metrics()
+        model_history = self.network.get_model_history()
 
         log_text += model_structure
+        log_text += '\n'
+
+        temp_model_history = PrettyTable()
+        temp_model_history.add_column(
+            'Epoch', ['Epoch ' + str(el)
+                      for el in range(1, len(model_history['acc']) + 1)])
+        for k, v in sorted(model_history.items()):
+            temp_model_history.add_column(k, v)
+        log_text += str(temp_model_history)
+
         log_text += """
 Test Metrics:
     Loss       : {}
@@ -143,6 +157,12 @@ _________________________________________________________________
     def print_model_structure(self, model_structure):
         print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
         print(model_structure)
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+
+    def print_model_history(self, model_history):
+        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+        for k, v in sorted(model_history.items()):
+            print('{}: {}'.format(k, v))
         print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
 
     def print_metrics(self, metrics):

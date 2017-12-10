@@ -3,6 +3,7 @@ from keras.layers import Input, Conv2D, MaxPooling2D, Reshape
 from keras.preprocessing.image import ImageDataGenerator
 from keras.models import load_model
 from keras.models import model_from_json
+from keras.callbacks import History
 import json
 import numpy as np
 
@@ -28,6 +29,8 @@ class YOLO:
 
         self.alpha_coord = config['network']['train']['loss']['alpha_coord']
         self.alpha_noobj = config['network']['train']['loss']['alpha_noobj']
+
+        self.history = History()
 
         self.model = self.create_model()
 
@@ -150,7 +153,8 @@ class YOLO:
 
         self.model.fit_generator(train_generator, steps_per_epoch=4800 // 64,
                                  epochs=5, validation_data=test_generator,
-                                 validation_steps=320 // 64)
+                                 validation_steps=320 // 64,
+                                 callbacks=[self.history])
 
     def custom_loss(self, true, pred):
         loss = 0
@@ -294,3 +298,6 @@ class YOLO:
 
     def get_model_structure(self):
         return self.model_structure
+
+    def get_model_history(self):
+        return self.history.history
