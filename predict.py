@@ -3,6 +3,7 @@ import numpy as np
 from scipy.misc import imresize
 import json
 import os
+import imghdr
 
 from network import YOLO
 
@@ -42,21 +43,44 @@ class Predict:
         return image
 
 
+def make_predictions_for_folder(predict, path):
+    for dirpath, dirnames, filenames in os.walk(path):
+        image_files = map(lambda filename: os.path.join(dirpath, filename),
+                          filenames)
+
+        for image_file in image_files:
+            image_type = imghdr.what(image_file)
+            if not image_type:
+                continue
+
+            prediction = predict.predict(image_file)
+
+            for el in prediction[0]:
+                for e in el:
+                    if np.sum(e) != 0:
+                            print(e)
+
+
 if __name__ == '__main__':
     with open('./config.json') as config_file:
         config = json.load(config_file)
 
     predict = Predict(config)
 
-    path = config['dataset']['dataset_images']['test_folder']
+    train_folder = config['dataset']['dataset_images']['train_folder']
+    validation_folder =\
+        config['dataset']['dataset_images']['validation_folder']
+    test_folder = config['dataset']['dataset_images']['train_folder']
 
-    for dirpath, dirnames, filenames in os.walk(path):
-        image_files = map(lambda filename: os.path.join(dirpath, filename),
-                          filenames)
-
-        for image_file in image_files:
-            prediction = predict.predict(image_file)
-
-            for el in prediction[0]:
-                if np.sum(el) != 0:
-                    print(el)
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    print('Train')
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    make_predictions_for_folder(predict, train_folder)
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    print('Validation')
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    make_predictions_for_folder(predict, validation_folder)
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    print('Test')
+    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    make_predictions_for_folder(predict, test_folder)
