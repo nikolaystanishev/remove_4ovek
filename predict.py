@@ -2,6 +2,7 @@ from scipy import ndimage
 import numpy as np
 from scipy.misc import imresize
 import json
+import os
 
 from network import YOLO
 
@@ -47,7 +48,15 @@ if __name__ == '__main__':
 
     predict = Predict(config)
 
-    path = './dataset/cvpr10_multiview_pedestrians/test/00036.png'
+    path = config['dataset']['dataset_images']['test_folder']
 
-    prediction = predict.predict(path)
-    print(prediction)
+    for dirpath, dirnames, filenames in os.walk(path):
+        image_files = map(lambda filename: os.path.join(dirpath, filename),
+                          filenames)
+
+        for image_file in image_files:
+            prediction = predict.predict(image_file)
+
+            for el in prediction[0]:
+                if np.sum(el) != 0:
+                    print(el)
