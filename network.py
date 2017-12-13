@@ -62,7 +62,7 @@ class YOLO:
         return model
 
     def create_network(self, input):
-        network = Conv2D(filters=16,
+        network = Conv2D(filters=32,
                          kernel_size=(3, 3),
                          strides=(1, 1),
                          padding='same',
@@ -71,7 +71,7 @@ class YOLO:
         network = MaxPooling2D(pool_size=(2, 2),
                                name='pool_1')(network)
 
-        network = Conv2D(filters=32,
+        network = Conv2D(filters=64,
                          kernel_size=(3, 3),
                          strides=(1, 1),
                          padding='same',
@@ -80,55 +80,61 @@ class YOLO:
         network = MaxPooling2D(pool_size=(2, 2),
                                name='pool_2')(network)
 
-        network = Conv2D(filters=64,
-                         kernel_size=(3, 3),
-                         strides=(1, 1),
-                         padding='same',
-                         activation='relu',
-                         name='conv_3')(network)
-        network = MaxPooling2D(pool_size=(2, 2),
-                               name='pool_3')(network)
-
         network = Conv2D(filters=128,
                          kernel_size=(3, 3),
                          strides=(1, 1),
                          padding='same',
                          activation='relu',
+                         name='conv_3')(network)
+        network = Conv2D(filters=64,
+                         kernel_size=(1, 1),
+                         strides=(1, 1),
+                         padding='same',
+                         activation='relu',
                          name='conv_4')(network)
-        network = MaxPooling2D(pool_size=(2, 2),
-                               name='pool_4')(network)
-
-        # network = Conv2D(filters=256,
-        #                  kernel_size=(3, 3),
-        #                  strides=(1, 1),
-        #                  padding='same',
-        #                  activation='relu',
-        #                  name='conv_5')(network)
-        # network = MaxPooling2D(pool_size=(2, 2),
-        #                        name='pool_5')(network)
-
-        # network = Conv2D(filters=512,
-        #                  kernel_size=(3, 3),
-        #                  strides=(1, 1),
-        #                  padding='same',
-        #                  activation='relu',
-        #                  name='conv_6')(network)
-        # network = MaxPooling2D(pool_size=(2, 2),
-        #                        name='pool_6')(network)
-
-        network = Conv2D(filters=1024,
+        network = Conv2D(filters=128,
                          kernel_size=(3, 3),
                          strides=(1, 1),
                          padding='same',
                          activation='relu',
-                         name='conv_7')(network)
+                         name='conv_5')(network)
+        network = MaxPooling2D(pool_size=(2, 2),
+                               name='pool_3')(network)
 
-        network = Conv2D(filters=1024,
+        network = Conv2D(filters=256,
+                         kernel_size=(3, 3),
+                         strides=(1, 1),
+                         padding='same',
+                         activation='relu',
+                         name='conv_6')(network)
+        network = Conv2D(filters=128,
+                         kernel_size=(1, 1),
+                         strides=(1, 1),
+                         padding='same',
+                         activation='relu',
+                         name='conv_7')(network)
+        network = Conv2D(filters=256,
                          kernel_size=(3, 3),
                          strides=(1, 1),
                          padding='same',
                          activation='relu',
                          name='conv_8')(network)
+        network = MaxPooling2D(pool_size=(2, 2),
+                               name='pool_4')(network)
+
+        network = Conv2D(filters=1024,
+                         kernel_size=(3, 3),
+                         strides=(1, 1),
+                         padding='same',
+                         activation='relu',
+                         name='conv_9')(network)
+
+        network = Conv2D(filters=1024,
+                         kernel_size=(3, 3),
+                         strides=(1, 1),
+                         padding='same',
+                         activation='relu',
+                         name='conv_10')(network)
 
         network = Conv2D(filters=(self.number_of_annotations + 1 +
                                   self.number_of_classes),
@@ -136,7 +142,7 @@ class YOLO:
                          strides=(1, 1),
                          padding='same',
                          activation='relu',
-                         name='conv_9')(network)
+                         name='conv_11')(network)
 
         network = Reshape((self.grid_size,
                            self.grid_size,
