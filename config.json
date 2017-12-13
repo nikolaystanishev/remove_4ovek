@@ -50,6 +50,8 @@
         "results_file": "./results.txt",
         "json_model_structure": "./model.json",
         "train": {
+            "batch_size": 64,
+            "number_of_epochs": 5,
             "loss": {
                 "alpha_coord": 5,
                 "alpha_noobj": 0.5

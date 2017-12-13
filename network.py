@@ -1,6 +1,5 @@
 from keras.models import Model
 from keras.layers import Input, Conv2D, MaxPooling2D, Reshape
-from keras.preprocessing.image import ImageDataGenerator
 from keras.models import load_model
 from keras.models import model_from_json
 from keras.callbacks import History
@@ -26,6 +25,9 @@ class YOLO:
         self.number_of_classes = config['label_info']['number_of_classes']
         self.number_of_annotations =\
             config['label_info']['number_of_annotations']
+
+        self.batch_size = config['network']['train']['batch_size']
+        self.number_of_epochs = config['network']['train']['number_of_epochs']
 
         self.alpha_coord = config['network']['train']['loss']['alpha_coord']
         self.alpha_noobj = config['network']['train']['loss']['alpha_noobj']
@@ -140,21 +142,13 @@ class YOLO:
         return network
 
     def train(self, train_data, train_labels, validation_data,
-              validation_labels, test_data, test_labels):
-        gen = ImageDataGenerator(rotation_range=8, width_shift_range=0.08,
-                                 shear_range=0.3, height_shift_range=0.08,
-                                 zoom_range=0.08)
-
-        test_gen = ImageDataGenerator()
-
-        train_generator = gen.flow(train_data, train_labels, batch_size=64)
-        test_generator = test_gen.flow(validation_data, validation_labels,
-                                       batch_size=64)
-
-        self.model.fit_generator(train_generator, steps_per_epoch=4800 // 64,
-                                 epochs=5, validation_data=test_generator,
-                                 validation_steps=320 // 64,
-                                 callbacks=[self.history])
+              validation_labels):
+        self.model.fit(train_data, train_labels,
+                       batch_size=self.batch_size,
+                       epochs=self.number_of_epochs,
+                       validation_data=(validation_data, validation_labels),
+                       shuffle=True,
+                       callbacks=[self.history])
 
     def custom_loss(self, true, pred):
         loss = 0

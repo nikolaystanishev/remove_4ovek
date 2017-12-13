@@ -46,8 +46,7 @@ class Train:
     def train(self):
         start_time = datetime.now()
         self.network.train(self.train_data, self.train_labels,
-                           self.validation_data, self.validation_labels,
-                           self.test_data, self.test_labels)
+                           self.validation_data, self.validation_labels)
         end_time = datetime.now()
         self.train_time = end_time - start_time
 
