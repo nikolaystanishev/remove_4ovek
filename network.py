@@ -3,6 +3,7 @@ from keras.layers import Input, Conv2D, MaxPooling2D, Reshape
 from keras.models import load_model
 from keras.models import model_from_json
 from keras.callbacks import History
+from keras.optimizers import SGD, Adam
 import json
 import numpy as np
 
@@ -50,8 +51,11 @@ class YOLO:
 
         network = self.create_network(input)
 
+        optimizer = SGD(lr=0.0001, momentum=0.9, decay=0.0005)
+        # optimizer = Adam(lr=0.0001, decay=0.0005)
+
         model = Model(input, network)
-        model.compile(optimizer='adam',
+        model.compile(optimizer=optimizer,
                       loss=self.custom_loss,
                       metrics=['accuracy', precision, recall, fmeasure])
         model.summary()
