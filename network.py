@@ -33,9 +33,14 @@ class YOLO:
         self.alpha_coord = config['network']['train']['loss']['alpha_coord']
         self.alpha_noobj = config['network']['train']['loss']['alpha_noobj']
 
-        self.history = History()
+        self.learning_rate =\
+            config['network']['train']['optimizer']['learning_rate']
+        self.momentum = config['network']['train']['optimizer']['momentum']
+        self.decay = config['network']['train']['optimizer']['decay']
 
-        self.model = self.create_model()
+        self.optimizer = None
+
+        self.history = History()
 
         self.metrics = None
         self.model_structure = None
@@ -45,19 +50,22 @@ class YOLO:
         self.model_json_structure_file =\
             config['network']['json_model_structure']
 
+        self.model = self.create_model()
+
     def create_model(self):
         input = Input(shape=(self.image_size, self.image_size,
                              self.color_channels))
 
         network = self.create_network(input)
 
-        optimizer = SGD(lr=0.0001, momentum=0.9, decay=0.0005)
-        # optimizer = Adam(lr=0.0001, decay=0.0005)
-
         model = Model(input, network)
-        model.compile(optimizer=optimizer,
+
+        self.optimizer = self.create_optimizer()
+
+        model.compile(optimizer=self.optimizer,
                       loss=self.custom_loss,
                       metrics=['accuracy', precision, recall, fmeasure])
+
         model.summary()
         return model
 
@@ -150,6 +158,15 @@ class YOLO:
                             self.number_of_classes)))(network)
 
         return network
+
+    def create_optimizer(self):
+        optimizer = SGD(lr=self.learning_rate,
+                        momentum=self.momentum,
+                        decay=self.decay)
+        # optimizer = Adam(lr=self.learning_rate,
+        #                  decay=self.decay)
+
+        return optimizer
 
     def train(self, train_data, train_labels, validation_data,
               validation_labels):
@@ -305,3 +322,9 @@ class YOLO:
 
     def get_model_history(self):
         return self.history.history
+
+    def get_optimizer_params(self):
+        return self.optimizer.get_config()
+
+    def get_optimizer_type(self):
+        return type(self.optimizer)
