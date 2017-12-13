@@ -41,101 +41,6 @@ class Train:
         self.full_time = end_time - start_time
 
         self.summary()
-        self.summary_to_file()
-
-    def train(self):
-        start_time = datetime.now()
-        self.network.train(self.train_data, self.train_labels,
-                           self.validation_data, self.validation_labels)
-        end_time = datetime.now()
-        self.train_time = end_time - start_time
-
-        self.network.save_model()
-        self.network.save_json_model_structure()
-
-    def summary(self):
-        self.network.summary(self.train_data, self.train_labels,
-                             self.validation_data, self.validation_labels,
-                             self.test_data, self.test_labels)
-
-        metrics = self.network.get_metrics()
-        model_structure = self.network.get_model_structure()
-        model_history = self.network.get_model_history()
-
-        self.print_model_structure(model_structure)
-        self.print_model_history(model_history)
-        self.print_metrics(metrics)
-
-    def summary_to_file(self):
-        log_text = self.create_log_text()
-
-        with open(self.results_file_name, 'a') as f:
-            f.write(log_text)
-
-    def create_log_text(self):
-        log_text = ''
-
-        model_structure = self.network.get_model_structure()
-        metrics = self.network.get_metrics()
-        model_history = self.network.get_model_history()
-
-        log_text += model_structure
-        log_text += '\n'
-
-        temp_model_history = PrettyTable()
-        temp_model_history.add_column(
-            'Epoch', ['Epoch ' + str(el)
-                      for el in range(1, len(model_history['acc']) + 1)])
-        for k, v in sorted(model_history.items()):
-            temp_model_history.add_column(k, v)
-        log_text += str(temp_model_history)
-
-        log_text += """
-Test Metrics:
-    Loss       : {}
-    Accuracy   : {}
-    Precision  : {}
-    Recall     : {}
-    F1 Score   : {}
-_________________________________________________________________
-Train Metrics:
-    Loss       : {}
-    Accuracy   : {}
-    Precision  : {}
-    Recall     : {}
-    F1 Score   : {}
-_________________________________________________________________
-Validation Metrics:
-    Loss       : {}
-    Accuracy   : {}
-    Precision  : {}
-    Recall     : {}
-    F1 Score   : {}
-_________________________________________________________________
-Time:
-    Train Time : {}
-    Full Time  : {}
-_________________________________________________________________
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-""".format(metrics['loss']['test_loss'],
-           metrics['accuracy']['test_accuracy'],
-           metrics['precision']['test_precision'],
-           metrics['recall']['test_recall'],
-           metrics['f1_score']['test_f1_score'],
-           metrics['loss']['train_loss'],
-           metrics['accuracy']['train_accuracy'],
-           metrics['precision']['train_precision'],
-           metrics['recall']['train_recall'],
-           metrics['f1_score']['train_f1_score'],
-           metrics['loss']['validation_loss'],
-           metrics['accuracy']['validation_accuracy'],
-           metrics['precision']['validation_precision'],
-           metrics['recall']['validation_recall'],
-           metrics['f1_score']['validation_f1_score'],
-           self.train_time,
-           self.full_time)
-
-        return log_text
 
     def load_data(self):
         self.train_data, self.train_labels =\
@@ -153,27 +58,130 @@ _________________________________________________________________
             del dataset
         return data, labels
 
-    def print_model_structure(self, model_structure):
-        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-        print(model_structure)
-        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    def train(self):
+        start_time = datetime.now()
+        self.network.train(self.train_data, self.train_labels,
+                           self.validation_data, self.validation_labels)
+        end_time = datetime.now()
+        self.train_time = end_time - start_time
 
-    def print_model_history(self, model_history):
-        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+        self.network.save_model()
+        self.network.save_json_model_structure()
+
+    def summary(self):
+        self.network.summary(self.train_data, self.train_labels,
+                             self.validation_data, self.validation_labels,
+                             self.test_data, self.test_labels)
+
+        log_text = self.create_log_text()
+
+        with open(self.results_file_name, 'a') as f:
+            f.write(log_text)
+
+    def create_log_text(self):
+        log_text = ''
+
+        model_structure = self.network.get_model_structure()
+
+        log_text += model_structure
+        log_text += '\n'
+
+        log_text += self.get_model_history_log()
+        log_text += """
+_________________________________________________________________
+"""
+
+        log_text += self.get_optimazer_log()
+
+        log_text += """
+_________________________________________________________________
+"""
+
+        log_text += self.get_metrics_log()
+
+        log_text += self.get_time_log()
+
+        self.print_log(log_text)
+
+        return log_text
+
+    def get_model_history_log(self):
+        model_history = self.network.get_model_history()
+
+        temp_model_history = PrettyTable()
+
+        temp_model_history.add_column(
+            'Epoch', ['Epoch ' + str(el)
+                      for el in range(1, len(model_history['acc']) + 1)])
         for k, v in sorted(model_history.items()):
-            print('{}: {}'.format(k, v))
-        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+            temp_model_history.add_column(k, v)
 
-    def print_metrics(self, metrics):
-        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-        print('Loss: {}'.format(metrics['loss']))
-        print('Accuracy: {}'.format(metrics['accuracy']))
-        print('Precision: {}'.format(metrics['precision']))
-        print('Recall: {}'.format(metrics['recall']))
-        print('F1 Score: {}'.format(metrics['f1_score']))
-        print('Train Time: {}'.format(self.train_time))
-        print('Full Time: {}'.format(self.full_time))
-        print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+        model_history_log = str(temp_model_history)
+
+        return model_history_log
+
+    def get_optimazer_log(self):
+        optimizer_type = self.network.get_optimizer_type()
+        optimizer_params = self.network.get_optimizer_params()
+
+        temp_optimizer_params = PrettyTable()
+
+        temp_optimizer_params.add_column('Optimizer', [optimizer_type])
+        for k, v in sorted(optimizer_params.items()):
+            temp_optimizer_params.add_column(k, [v])
+
+        optimizer_log = str(temp_optimizer_params)
+
+        return optimizer_log
+
+    def get_metrics_log(self):
+        metrics = self.network.get_metrics()
+
+        temp_metrics = PrettyTable()
+
+        temp_metrics.add_column('Metrics', ['Test Metrics', 'Train Metrics',
+                                            'Validation Metrics'])
+
+        temp_metrics.add_column('Loss',
+                                [metrics['loss']['test_loss'],
+                                 metrics['loss']['train_loss'],
+                                 metrics['loss']['validation_loss']])
+        temp_metrics.add_column('Accuracy',
+                                [metrics['accuracy']['test_accuracy'],
+                                 metrics['accuracy']['train_accuracy'],
+                                 metrics['accuracy']['validation_accuracy']])
+        temp_metrics.add_column('Precision',
+                                [metrics['precision']['test_precision'],
+                                 metrics['precision']['train_precision'],
+                                 metrics['precision']['validation_precision']])
+        temp_metrics.add_column('Recall',
+                                [metrics['recall']['test_recall'],
+                                 metrics['recall']['train_recall'],
+                                 metrics['recall']['validation_recall']])
+        temp_metrics.add_column('F1 Score',
+                                [metrics['f1_score']['test_f1_score'],
+                                 metrics['f1_score']['train_f1_score'],
+                                 metrics['f1_score']['validation_f1_score']])
+
+        metrics_log = str(temp_metrics)
+
+        return metrics_log
+
+    def get_time_log(self):
+        time_log = """
+_________________________________________________________________
+Time:
+    Train Time : {}
+    Full Time  : {}
+_________________________________________________________________
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+""".format(self.train_time,
+           self.full_time)
+
+        return time_log
+
+    def print_log(self, log):
+        print(log)
 
 
 if __name__ == '__main__':
