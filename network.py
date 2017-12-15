@@ -5,6 +5,7 @@ from keras.models import model_from_json
 from keras.callbacks import History
 from keras.optimizers import SGD, Adam, RMSprop, Adagrad, Adadelta, Adamax,\
     Nadam
+from keras.initializers import RandomNormal
 import json
 import numpy as np
 
@@ -76,7 +77,8 @@ class YOLO:
                          strides=(1, 1),
                          padding='same',
                          activation='relu',
-                         name='conv_1')(input)
+                         name='conv_1',
+                         kernel_initializer=RandomNormal())(input)
         network = MaxPooling2D(pool_size=(2, 2),
                                name='pool_1')(network)
 
@@ -85,7 +87,8 @@ class YOLO:
                          strides=(1, 1),
                          padding='same',
                          activation='relu',
-                         name='conv_2')(network)
+                         name='conv_2',
+                         kernel_initializer=RandomNormal())(network)
         network = MaxPooling2D(pool_size=(2, 2),
                                name='pool_2')(network)
 
@@ -94,19 +97,22 @@ class YOLO:
                          strides=(1, 1),
                          padding='same',
                          activation='relu',
-                         name='conv_3')(network)
+                         name='conv_3',
+                         kernel_initializer=RandomNormal())(network)
         network = Conv2D(filters=64,
                          kernel_size=(1, 1),
                          strides=(1, 1),
                          padding='same',
                          activation='relu',
-                         name='conv_4')(network)
+                         name='conv_4',
+                         kernel_initializer=RandomNormal())(network)
         network = Conv2D(filters=128,
                          kernel_size=(3, 3),
                          strides=(1, 1),
                          padding='same',
                          activation='relu',
-                         name='conv_5')(network)
+                         name='conv_5',
+                         kernel_initializer=RandomNormal())(network)
         network = MaxPooling2D(pool_size=(2, 2),
                                name='pool_3')(network)
 
@@ -115,19 +121,22 @@ class YOLO:
                          strides=(1, 1),
                          padding='same',
                          activation='relu',
-                         name='conv_6')(network)
+                         name='conv_6',
+                         kernel_initializer=RandomNormal())(network)
         network = Conv2D(filters=128,
                          kernel_size=(1, 1),
                          strides=(1, 1),
                          padding='same',
                          activation='relu',
-                         name='conv_7')(network)
+                         name='conv_7',
+                         kernel_initializer=RandomNormal())(network)
         network = Conv2D(filters=256,
                          kernel_size=(3, 3),
                          strides=(1, 1),
                          padding='same',
                          activation='relu',
-                         name='conv_8')(network)
+                         name='conv_8',
+                         kernel_initializer=RandomNormal())(network)
         network = MaxPooling2D(pool_size=(2, 2),
                                name='pool_4')(network)
 
@@ -136,14 +145,16 @@ class YOLO:
                          strides=(1, 1),
                          padding='same',
                          activation='relu',
-                         name='conv_9')(network)
+                         name='conv_9',
+                         kernel_initializer=RandomNormal())(network)
 
         network = Conv2D(filters=1024,
                          kernel_size=(3, 3),
                          strides=(1, 1),
                          padding='same',
                          activation='relu',
-                         name='conv_10')(network)
+                         name='conv_10',
+                         kernel_initializer=RandomNormal())(network)
 
         network = Conv2D(filters=(self.number_of_annotations + 1 +
                                   self.number_of_classes),
@@ -151,7 +162,8 @@ class YOLO:
                          strides=(1, 1),
                          padding='same',
                          activation='relu',
-                         name='conv_11')(network)
+                         name='conv_11',
+                         kernel_initializer=RandomNormal())(network)
 
         network = Reshape((self.grid_size,
                            self.grid_size,
