@@ -3,7 +3,8 @@ from keras.layers import Input, Conv2D, MaxPooling2D, Reshape
 from keras.models import load_model
 from keras.models import model_from_json
 from keras.callbacks import History
-from keras.optimizers import SGD, Adam
+from keras.optimizers import SGD, Adam, RMSprop, Adagrad, Adadelta, Adamax,\
+    Nadam
 import json
 import numpy as np
 
@@ -160,6 +161,14 @@ class YOLO:
         return network
 
     def create_optimizer(self):
+        # optimizer = SGD()
+        # optimizer = RMSprop()
+        # optimizer = Adagrad()
+        # optimizer = Adadelta()
+        # optimizer = Adam()
+        # optimizer = Adamax()
+        # optimizer = Nadam()
+
         optimizer = SGD(lr=self.learning_rate,
                         momentum=self.momentum,
                         decay=self.decay)
@@ -242,6 +251,11 @@ class YOLO:
     def load_model(self):
         custom_objects = self.get_custom_objects()
         self.model = load_model(self.model_binary_data_file,
+                                custom_objects=custom_objects)
+
+    def load_model_file(self, model_file):
+        custom_objects = self.get_custom_objects()
+        self.model = load_model(model_file,
                                 custom_objects=custom_objects)
 
     def save_json_model_structure(self):
