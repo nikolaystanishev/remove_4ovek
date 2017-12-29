@@ -1,7 +1,7 @@
 import os
 import numpy as np
 from scipy import ndimage
-from scipy.misc import imresize
+from skimage.transform import resize
 import xml.etree.ElementTree as ET
 import pickle
 from PIL import Image
@@ -42,6 +42,8 @@ class DataProcessing:
         self.number_of_classes = config['label_info']['number_of_classes']
         self.number_of_annotations =\
             config['label_info']['number_of_annotations']
+
+        self.normalizer = None
 
         self.time = None
 
@@ -184,8 +186,7 @@ class DataProcessing:
         return images, labels
 
     def process_image(self, image_file):
-        image_data = (ndimage.imread(image_file).astype(float) -
-                      (self.pixel_depth / 2)) / self.pixel_depth
+        image_data = ndimage.imread(image_file).astype(float)
 
         if len(image_data.shape) == 2:
             image_data = np.repeat(image_data[:, :, np.newaxis], 3, axis=2)
@@ -194,13 +195,37 @@ class DataProcessing:
 
         if image_data.shape != (self.image_size, self.image_size,
                                 self.color_channels):
-            image = imresize(image_data, size=(self.image_size,
-                                               self.image_size))
+            image = resize(image_data,
+                           output_shape=(self.image_size, self.image_size),
+                           mode='constant')
         else:
             image = image_data
 
         image = np.expand_dims(image, axis=0)
+
+        if self.normalizer == 0 or self.normalizer is None:
+            image = self.normalize_image_without_normalization(image)
+        elif self.normalizer == 1:
+            image = self.normalize_image_from_0_to_1(image)
+        elif self.normalizer == 2:
+            image = self.normalize_image_from_minus1_to_1(image)
+
         return (image, original_size)
+
+    def normalize_image_from_minus1_to_1(self, image):
+        normalized_image = (image - (self.pixel_depth / 2)) / self.pixel_depth
+
+        return normalized_image
+
+    def normalize_image_from_0_to_1(self, image):
+        normalized_image = image / self.pixel_depth
+
+        return normalized_image
+
+    def normalize_image_without_normalization(self, image):
+        normalized_image = image
+
+        return normalized_image
 
     def process_image_labels(self, annotations, original_size):
         label = np.zeros((self.grid_size, self.grid_size,
@@ -211,10 +236,10 @@ class DataProcessing:
             box, grid_x, grid_y =\
                 self.process_label_annotation(annotation, original_size)
 
-            if grid_x >= 17:
-                grid_x = 16
-            if grid_y >= 17:
-                grid_y = 16
+            if grid_x >= self.grid_size:
+                grid_x = self.grid_size - 1
+            if grid_y >= self.grid_size:
+                grid_y = self.grid_size - 1
 
             label[grid_x, grid_y, 0:4] = box
             label[grid_x, grid_y, 4] = 1
@@ -252,12 +277,16 @@ class DataProcessing:
     def get_time(self):
         return self.time
 
+    def set_normalizer(self, normalizer):
+        self.normalizer = normalizer
+
 
 if __name__ == '__main__':
     with open('./config.json') as config_file:
         config = json.load(config_file)
 
     dp = DataProcessing(config)
+    dp.set_normalizer(1)
     dp.pickle_dataset()
 
     print('Taken time: {}'.format(str(dp.get_time())))
