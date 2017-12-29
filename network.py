@@ -276,36 +276,49 @@ class YOLO:
         h_true = true[:, :, 3]
         h_pred = pred[:, :, 3]
 
-        c_true = true[:, :, 4]
-        c_pred = pred[:, :, 4]
+        if self.number_of_classes >= 0:
+            c_true = true[:, :, 4]
+            c_pred = pred[:, :, 4]
 
-        p_true = true[:, :, 5]
-        p_pred = pred[:, :, 5]
-
-        loss +=\
-            np.sum(
-                tf.scalar_mul(self.alpha_coord,
-                              tf.add(tf.squared_difference(x_true, x_pred),
-                                     tf.squared_difference(y_true, y_pred))))
+        if self.number_of_classes >= 1:
+            p_true = true[:, :, 5]
+            p_pred = pred[:, :, 5]
 
         loss +=\
             np.sum(
                 tf.scalar_mul(
                     self.alpha_coord,
-                    tf.add(tf.squared_difference(tf.sqrt(w_true),
-                                                 tf.sqrt(w_pred)),
-                           tf.squared_difference(tf.sqrt(h_true),
-                                                 tf.sqrt(h_pred)))))
+                    tf.multiply(
+                        p_true,
+                        tf.add(tf.squared_difference(x_true, x_pred),
+                               tf.squared_difference(y_true, y_pred)))))
 
-        loss += np.sum(tf.squared_difference(c_true, c_pred))
+        loss +=\
+            np.sum(
+                tf.scalar_mul(
+                    self.alpha_coord,
+                    tf.multiply(
+                        p_true,
+                        tf.add(tf.squared_difference(tf.sqrt(w_true),
+                                                     tf.sqrt(w_pred)),
+                               tf.squared_difference(tf.sqrt(h_true),
+                                                     tf.sqrt(h_pred))))))
 
-        loss += np.sum(tf.scalar_mul(self.alpha_noobj,
-                                     tf.squared_difference(c_true, c_pred)))
+        if self.number_of_classes >= 0:
+            loss += np.sum(tf.multiply(p_true,
+                                       tf.squared_difference(c_true, c_pred)))
 
-        loss += np.sum(tf.squared_difference(p_true, p_pred))
+            loss += np.sum(tf.scalar_mul(self.alpha_noobj,
+                                         tf.multiply(
+                                             p_true,
+                                             tf.squared_difference(c_true,
+                                                                   c_pred))))
+
+        if self.number_of_classes >= 1:
+            loss += np.sum(tf.multiply(p_true,
+                                       tf.squared_difference(p_true, p_pred)))
 
         return loss
-
 
     def predict(self, image):
         predict = self.model.predict(image)
