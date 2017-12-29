@@ -97,6 +97,12 @@ _________________________________________________________________
 _________________________________________________________________
 """
 
+        log_text += self.get_batch_size_log()
+
+        log_text += """
+_________________________________________________________________
+"""
+
         log_text += self.get_metrics_log()
 
         log_text += self.get_time_log()
@@ -179,6 +185,17 @@ _________________________________________________________________
            self.full_time)
 
         return time_log
+
+    def get_batch_size_log(self):
+        batch_size = self.network.get_batch_size()
+
+        temp_batch_size = PrettyTable()
+
+        temp_batch_size.add_column('Batch Size', [batch_size])
+
+        batch_size_log = str(temp_batch_size)
+
+        return batch_size_log
 
     def print_log(self, log):
         print(log)
