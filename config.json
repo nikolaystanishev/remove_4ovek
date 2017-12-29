@@ -5,7 +5,7 @@
         "folder": "./dataset/cvpr10_multiview_pedestrians",
         "dataset_images": {
             "train_folder": "./dataset/cvpr10_multiview_pedestrians/train",
-            "validation_folder": "./dataset/cvpr10_multiview_pedestrians/validation",
+            "validation_folder": "./dataset/cvpr10_multiview_pedestrians/validate",
             "test_folder": "./dataset/cvpr10_multiview_pedestrians/test"
         },
         "dataset_annotations": {
@@ -34,13 +34,13 @@
     },
 
     "image_info": {
-        "image_size": 272,
+        "image_size": 288,
         "pixel_depth": 255.0,
         "color_channels": 3
     },
 
     "label_info": {
-        "grid_size": 17,
+        "grid_size": 9,
         "number_of_classes": 1,
         "number_of_annotations": 4
     },
@@ -50,8 +50,8 @@
         "results_file": "./results.txt",
         "json_model_structure": "./model.json",
         "train": {
-            "batch_size": 64,
-            "number_of_epochs": 5,
+            "batch_size": 32,
+            "number_of_epochs": 200,
             "loss": {
                 "alpha_coord": 5,
                 "alpha_noobj": 0.5
