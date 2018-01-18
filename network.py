@@ -276,13 +276,8 @@ class YOLO:
         h_true = true[:, :, 3]
         h_pred = pred[:, :, 3]
 
-        if self.number_of_classes >= 0:
-            c_true = true[:, :, 4]
-            c_pred = pred[:, :, 4]
-
-        if self.number_of_classes >= 1:
-            p_true = true[:, :, 5]
-            p_pred = pred[:, :, 5]
+        p_true = true[:, :, 4]
+        p_pred = pred[:, :, 4]
 
         loss +=\
             np.sum(
@@ -304,19 +299,15 @@ class YOLO:
                                tf.squared_difference(tf.sqrt(h_true),
                                                      tf.sqrt(h_pred))))))
 
-        if self.number_of_classes >= 0:
-            loss += np.sum(tf.multiply(p_true,
-                                       tf.squared_difference(c_true, c_pred)))
+        loss += np.sum(tf.multiply(p_true,
+                                   tf.squared_difference(p_true, p_pred)))
 
-            loss += np.sum(tf.scalar_mul(self.alpha_noobj,
-                                         tf.multiply(
-                                             p_true,
-                                             tf.squared_difference(c_true,
-                                                                   c_pred))))
-
-        if self.number_of_classes >= 1:
-            loss += np.sum(tf.multiply(p_true,
-                                       tf.squared_difference(p_true, p_pred)))
+        loss +=\
+            np.sum(
+                tf.scalar_mul(
+                    self.alpha_noobj,
+                    tf.multiply((1 - p_true),
+                                tf.squared_difference(p_true, p_pred))))
 
         return loss
 
