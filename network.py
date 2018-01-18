@@ -79,7 +79,7 @@ class YOLO:
                          activation='relu',
                          name='conv_1',
                          kernel_initializer=RandomNormal(),
-                         use_bias=False)(input)
+                         use_bias=True)(input)
         network = MaxPooling2D(pool_size=(2, 2),
                                name='pool_1')(network)
 
@@ -90,7 +90,7 @@ class YOLO:
                          activation='relu',
                          name='conv_2',
                          kernel_initializer=RandomNormal(),
-                         use_bias=False)(network)
+                         use_bias=True)(network)
         network = MaxPooling2D(pool_size=(2, 2),
                                name='pool_2')(network)
 
@@ -101,7 +101,7 @@ class YOLO:
                          activation='relu',
                          name='conv_3',
                          kernel_initializer=RandomNormal(),
-                         use_bias=False)(network)
+                         use_bias=True)(network)
         network = Conv2D(filters=64,
                          kernel_size=(1, 1),
                          strides=(1, 1),
@@ -109,7 +109,7 @@ class YOLO:
                          activation='relu',
                          name='conv_4',
                          kernel_initializer=RandomNormal(),
-                         use_bias=False)(network)
+                         use_bias=True)(network)
         network = Conv2D(filters=128,
                          kernel_size=(3, 3),
                          strides=(1, 1),
@@ -117,7 +117,7 @@ class YOLO:
                          activation='relu',
                          name='conv_5',
                          kernel_initializer=RandomNormal(),
-                         use_bias=False)(network)
+                         use_bias=True)(network)
         network = MaxPooling2D(pool_size=(2, 2),
                                name='pool_3')(network)
 
@@ -128,7 +128,7 @@ class YOLO:
                          activation='relu',
                          name='conv_6',
                          kernel_initializer=RandomNormal(),
-                         use_bias=False)(network)
+                         use_bias=True)(network)
         network = Conv2D(filters=128,
                          kernel_size=(1, 1),
                          strides=(1, 1),
@@ -136,7 +136,7 @@ class YOLO:
                          activation='relu',
                          name='conv_7',
                          kernel_initializer=RandomNormal(),
-                         use_bias=False)(network)
+                         use_bias=True)(network)
         network = Conv2D(filters=256,
                          kernel_size=(3, 3),
                          strides=(1, 1),
@@ -144,7 +144,7 @@ class YOLO:
                          activation='relu',
                          name='conv_8',
                          kernel_initializer=RandomNormal(),
-                         use_bias=False)(network)
+                         use_bias=True)(network)
         network = MaxPooling2D(pool_size=(2, 2),
                                name='pool_4')(network)
 
@@ -155,7 +155,7 @@ class YOLO:
                          activation='relu',
                          name='conv_9',
                          kernel_initializer=RandomNormal(),
-                         use_bias=False)(network)
+                         use_bias=True)(network)
         network = Conv2D(filters=256,
                          kernel_size=(1, 1),
                          strides=(1, 1),
@@ -163,7 +163,7 @@ class YOLO:
                          activation='relu',
                          name='conv_10',
                          kernel_initializer=RandomNormal(),
-                         use_bias=False)(network)
+                         use_bias=True)(network)
         network = Conv2D(filters=512,
                          kernel_size=(3, 3),
                          strides=(1, 1),
@@ -171,7 +171,7 @@ class YOLO:
                          activation='relu',
                          name='conv_11',
                          kernel_initializer=RandomNormal(),
-                         use_bias=False)(network)
+                         use_bias=True)(network)
         network = Conv2D(filters=256,
                          kernel_size=(1, 1),
                          strides=(1, 1),
@@ -179,7 +179,7 @@ class YOLO:
                          activation='relu',
                          name='conv_12',
                          kernel_initializer=RandomNormal(),
-                         use_bias=False)(network)
+                         use_bias=True)(network)
         network = Conv2D(filters=512,
                          kernel_size=(3, 3),
                          strides=(1, 1),
@@ -187,7 +187,7 @@ class YOLO:
                          activation='relu',
                          name='conv_13',
                          kernel_initializer=RandomNormal(),
-                         use_bias=False)(network)
+                         use_bias=True)(network)
         network = MaxPooling2D(pool_size=(2, 2),
                                name='pool_5')(network)
 
@@ -198,7 +198,7 @@ class YOLO:
                          activation='relu',
                          name='conv_14',
                          kernel_initializer=RandomNormal(),
-                         use_bias=False)(network)
+                         use_bias=True)(network)
 
         network = Conv2D(filters=1024,
                          kernel_size=(3, 3),
@@ -207,17 +207,17 @@ class YOLO:
                          activation='relu',
                          name='conv_15',
                          kernel_initializer=RandomNormal(),
-                         use_bias=False)(network)
+                         use_bias=True)(network)
 
         network = Conv2D(filters=(self.number_of_annotations + 1 +
                                   self.number_of_classes),
                          kernel_size=(1, 1),
                          strides=(1, 1),
                          padding='same',
-                         activation='relu',
+                         activation='sigmoid',
                          name='conv_16',
                          kernel_initializer=RandomNormal(),
-                         use_bias=False)(network)
+                         use_bias=True)(network)
 
         network = Reshape((self.grid_size,
                            self.grid_size,
