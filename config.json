@@ -60,6 +60,9 @@
                 "momentum": 0.9,
                 "decay": 0.0005
             }
+        },
+        "predict": {
+            "min_probability": 0.5
         }
     }
 }

@@ -8,6 +8,7 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 from prettytable import PrettyTable
+import tensorflow as tf
 
 from network import YOLO
 
@@ -35,7 +36,7 @@ class Predict:
 
         predict = self.network.predict(image)
 
-        self.draw_rectangle(image[0], predict[0])
+        self.draw_rectangles(image[0], predict)
 
         return predict
 
@@ -109,10 +110,9 @@ class Predict:
                 if np.sum(prediction) != 0:
                     print('.')
 
-                for el in prediction[0]:
-                    for e in el:
-                        if np.sum(e) != 0:
-                                print(e)
+                for el in prediction:
+                    if np.sum(el) != 0:
+                            print(el)
 
     def normalize_image_from_minus1_to_1(self, image):
         normalized_image = (image - (self.pixel_depth / 2)) / self.pixel_depth
@@ -129,35 +129,12 @@ class Predict:
 
         return normalized_image
 
-    def draw_rectangle(self, image, lables):
+    def draw_rectangles(self, image, lables):
         fig, ax = plt.subplots(1)
         ax.imshow(image)
 
-        for row in lables:
-            for label in row:
-                x = label[0] * self.image_size
-                y = label[1] * self.image_size
-                w = (label[2] - label[0]) * self.image_size
-                h = (label[3] - label[1]) * self.image_size
-
-                rect = Rectangle((x, y), w, h, linewidth=1,
-                                 edgecolor='r', facecolor='none')
-
-                ax.add_patch(rect)
-
-        plt.show()
-
-        lables = np.reshape(lables, (self.grid_size ** 2, 5))
-        lables = lables[lables[:, 4].argsort()][::-1]
-
         for label in lables:
-            if label[4] < 0.05:
-                break
-
             print(label[4])
-
-            fig, ax = plt.subplots(1)
-            ax.imshow(image)
 
             x = label[0] * self.image_size
             y = label[1] * self.image_size
@@ -168,7 +145,8 @@ class Predict:
                              edgecolor='r', facecolor='none')
 
             ax.add_patch(rect)
-            plt.show()
+
+        plt.show()
 
     def draw_grid(self, image, predict):
         predict_table = PrettyTable()
@@ -194,6 +172,7 @@ if __name__ == '__main__':
     with open('./config.json') as config_file:
         config = json.load(config_file)
 
-    predict = Predict(config)
+    with tf.Session():
+        predict = Predict(config)
 
-    predict.make_predictions_for_optimizers()
+        predict.make_predictions_for_optimizers()

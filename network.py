@@ -50,6 +50,8 @@ class YOLO:
         self.model_json_structure_file =\
             config['network']['json_model_structure']
 
+        self.min_probability = config['network']['predict']['min_probability']
+
         self.model = self.create_model()
 
     def create_model(self):
@@ -298,22 +300,42 @@ class YOLO:
         predict = self.model.predict(image)
 
         predict = self.boxes_to_corners(predict)
+        true_boxes = self.non_max_suppression(predict)
 
-        return predict
+        return true_boxes
 
-    def boxes_to_corners(self, predictions):
-        corners_predictions = np.array(predictions, copy=True)
+    def boxes_to_corners(self, prediction):
+        corners_prediction = np.array(prediction, copy=True)
 
-        corners_predictions[:, :, :, 0] =\
-            predictions[:, :, :, 0] - (predictions[:, :, :, 2] / 2)
-        corners_predictions[:, :, :, 1] =\
-            predictions[:, :, :, 1] - (predictions[:, :, :, 3] / 2)
-        corners_predictions[:, :, :, 2] =\
-            predictions[:, :, :, 0] + (predictions[:, :, :, 2] / 2)
-        corners_predictions[:, :, :, 3] =\
-            predictions[:, :, :, 1] + (predictions[:, :, :, 3] / 2)
+        corners_prediction[:, :, :, 0] =\
+            prediction[:, :, :, 0] - (prediction[:, :, :, 2] / 2)
+        corners_prediction[:, :, :, 1] =\
+            prediction[:, :, :, 1] - (prediction[:, :, :, 3] / 2)
+        corners_prediction[:, :, :, 2] =\
+            prediction[:, :, :, 0] + (prediction[:, :, :, 2] / 2)
+        corners_prediction[:, :, :, 3] =\
+            prediction[:, :, :, 1] + (prediction[:, :, :, 3] / 2)
 
-        return corners_predictions
+        return corners_prediction
+
+    def non_max_suppression(self, predict):
+        predict = np.reshape(predict, (self.grid_size ** 2, 5))
+        predict = predict[predict[:, 4] > self.min_probability]
+
+        probabilities = predict[:, 4]
+        boxes = predict[:, :4]
+
+        true_boxes_idx = tf.image.non_max_suppression(boxes, probabilities,
+                                                      self.grid_size ** 2)
+        true_boxes = tf.gather(boxes, true_boxes_idx)
+        true_probabilities = tf.gather(probabilities, true_boxes_idx)
+
+        true_boxes = np.array(true_boxes.eval())
+        true_probabilities = np.array(true_probabilities.eval())
+
+        true_boxes = np.append(true_boxes, true_probabilities[:, None], axis=1)
+
+        return true_boxes
 
     def save_model(self):
         self.model.save(self.model_binary_data_file)
