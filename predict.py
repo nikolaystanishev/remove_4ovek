@@ -135,10 +135,10 @@ class Predict:
 
         for row in lables:
             for label in row:
-                w = label[2] * self.image_size
-                h = label[3] * self.image_size
-                x = label[0] * self.image_size - w / 2
-                y = label[1] * self.image_size - h / 2
+                x = label[0] * self.image_size
+                y = label[1] * self.image_size
+                w = (label[2] - label[0]) * self.image_size
+                h = (label[3] - label[1]) * self.image_size
 
                 rect = Rectangle((x, y), w, h, linewidth=1,
                                  edgecolor='r', facecolor='none')
@@ -159,10 +159,10 @@ class Predict:
             fig, ax = plt.subplots(1)
             ax.imshow(image)
 
-            w = label[2] * self.image_size
-            h = label[3] * self.image_size
-            x = label[0] * self.image_size - w / 2
-            y = label[1] * self.image_size - h / 2
+            x = label[0] * self.image_size
+            y = label[1] * self.image_size
+            w = (label[2] - label[0]) * self.image_size
+            h = (label[3] - label[1]) * self.image_size
 
             rect = Rectangle((x, y), w, h, linewidth=1,
                              edgecolor='r', facecolor='none')

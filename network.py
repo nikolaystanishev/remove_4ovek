@@ -297,7 +297,23 @@ class YOLO:
     def predict(self, image):
         predict = self.model.predict(image)
 
+        predict = self.boxes_to_corners(predict)
+
         return predict
+
+    def boxes_to_corners(self, predictions):
+        corners_predictions = np.array(predictions, copy=True)
+
+        corners_predictions[:, :, :, 0] =\
+            predictions[:, :, :, 0] - (predictions[:, :, :, 2] / 2)
+        corners_predictions[:, :, :, 1] =\
+            predictions[:, :, :, 1] - (predictions[:, :, :, 3] / 2)
+        corners_predictions[:, :, :, 2] =\
+            predictions[:, :, :, 0] + (predictions[:, :, :, 2] / 2)
+        corners_predictions[:, :, :, 3] =\
+            predictions[:, :, :, 1] + (predictions[:, :, :, 3] / 2)
+
+        return corners_predictions
 
     def save_model(self):
         self.model.save(self.model_binary_data_file)
