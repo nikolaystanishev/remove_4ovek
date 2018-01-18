@@ -24,7 +24,6 @@ class YOLO:
         self.color_channels = config['image_info']['color_channels']
 
         self.grid_size = config['label_info']['grid_size']
-        self.number_of_classes = config['label_info']['number_of_classes']
         self.number_of_annotations =\
             config['label_info']['number_of_annotations']
 
@@ -208,8 +207,7 @@ class YOLO:
                          kernel_initializer=RandomNormal(),
                          use_bias=True)(network)
 
-        network = Conv2D(filters=(self.number_of_annotations + 1 +
-                                  self.number_of_classes),
+        network = Conv2D(filters=(self.number_of_annotations + 1),
                          kernel_size=(1, 1),
                          strides=(1, 1),
                          padding='same',
@@ -220,8 +218,7 @@ class YOLO:
 
         network = Reshape((self.grid_size,
                            self.grid_size,
-                           (self.number_of_annotations + 1 +
-                            self.number_of_classes)))(network)
+                           (self.number_of_annotations + 1)))(network)
 
         return network
 
@@ -245,12 +242,10 @@ class YOLO:
 
         true =\
             tf.reshape(true, shape=(-1, self.grid_size ** 2,
-                                    (self.number_of_annotations + 1 +
-                                     self.number_of_classes)))
+                                    (self.number_of_annotations + 1)))
         pred =\
             tf.reshape(pred, shape=(-1, self.grid_size ** 2,
-                                    (self.number_of_annotations + 1 +
-                                     self.number_of_classes)))
+                                    (self.number_of_annotations + 1)))
 
         x_true = true[:, :, 0]
         x_pred = pred[:, :, 0]

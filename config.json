@@ -41,7 +41,6 @@
 
     "label_info": {
         "grid_size": 9,
-        "number_of_classes": 1,
         "number_of_annotations": 4
     },
 

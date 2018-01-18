@@ -39,7 +39,6 @@ class DataProcessing:
         self.test_pickle_name = config['dataset']['pickle_name']['test']
 
         self.grid_size = config['label_info']['grid_size']
-        self.number_of_classes = config['label_info']['number_of_classes']
         self.number_of_annotations =\
             config['label_info']['number_of_annotations']
 
@@ -69,8 +68,7 @@ class DataProcessing:
                     np.ndarray(shape=(0, self.image_size, self.image_size,
                                       self.color_channels), dtype=np.float32),
                  'labels': np.ndarray(shape=(0, self.grid_size, self.grid_size,
-                                             (1 + self.number_of_annotations +
-                                              self.number_of_classes)),
+                                             (1 + self.number_of_annotations)),
                                       dtype=np.float32)}
             pickle.dump(dataset_template, f, pickle.HIGHEST_PROTOCOL)
 
@@ -169,8 +167,8 @@ class DataProcessing:
         images = np.ndarray(shape=(0, self.image_size, self.image_size,
                                    self.color_channels), dtype=np.float32)
         labels = np.ndarray(shape=(0, self.grid_size, self.grid_size,
-                                   (1 + self.number_of_annotations +
-                                    self.number_of_classes)), dtype=np.float32)
+                                   (1 + self.number_of_annotations)),
+                            dtype=np.float32)
 
         for image_file in image_files:
             print(".", end='')
@@ -229,8 +227,7 @@ class DataProcessing:
 
     def process_image_labels(self, annotations, original_size):
         label = np.zeros((self.grid_size, self.grid_size,
-                          (1 + self.number_of_annotations +
-                           self.number_of_classes)))
+                          (1 + self.number_of_annotations)))
 
         for annotation in annotations:
             box, grid_x, grid_y =\
@@ -243,7 +240,6 @@ class DataProcessing:
 
             label[grid_x, grid_y, 0:4] = box
             label[grid_x, grid_y, 4] = 1
-            label[grid_x, grid_y, 5] = 1
 
         return np.array(label, ndmin=4)
 
