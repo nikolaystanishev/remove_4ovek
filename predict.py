@@ -5,6 +5,9 @@ import json
 import os
 import imghdr
 from datetime import datetime
+import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
+from prettytable import PrettyTable
 
 from network import YOLO
 
@@ -13,24 +16,26 @@ class Predict:
 
     def __init__(self, config):
         self.network = YOLO(config)
-        self.network.load_model()
 
         self.image_size = config['image_info']['image_size']
         self.pixel_depth = config['image_info']['pixel_depth']
         self.color_channels = config['image_info']['color_channels']
+
+        self.grid_size = config['label_info']['grid_size']
 
         self.train_folder = config['dataset']['dataset_images']['train_folder']
         self.validation_folder =\
             config['dataset']['dataset_images']['validation_folder']
         self.test_folder = config['dataset']['dataset_images']['test_folder']
 
-        self.models = {
-            '33': './model/33/model.h5'}
+        self.models = {'49': './model/49/model.h5'}
 
     def predict(self, image_file):
         image = self.get_image_from_file(image_file)
 
         predict = self.network.predict(image)
+
+        self.draw_rectangle(image[0], predict[0])
 
         return predict
 
@@ -56,13 +61,13 @@ class Predict:
 
         return image
 
-    def make_predictions_for_models(self):
-        for model, model_file in self.models.items():
+    def make_predictions_for_optimizers(self):
+        for optimizer, model_file in self.models.items():
             start_time = datetime.now()
 
             self.network.load_model_file(model_file)
             print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-            print(model)
+            print(optimizer)
             print('==========================================================')
             print('Train')
             print('==========================================================')
@@ -75,6 +80,12 @@ class Predict:
             print('Test')
             print('==========================================================')
             self.make_predictions_for_folder(self.test_folder)
+            print('==========================================================')
+            print('VOC')
+            print('==========================================================')
+            self.make_predictions_for_folder('../../../../Downloads/dataset/'
+                                             'VOCdevkit/VOC2012/JPEGImages/')
+            print('==========================================================')
 
             end_time = datetime.now()
             full_time = end_time - start_time
@@ -118,6 +129,66 @@ class Predict:
 
         return normalized_image
 
+    def draw_rectangle(self, image, lables):
+        fig, ax = plt.subplots(1)
+        ax.imshow(image)
+
+        for row in lables:
+            for label in row:
+                w = label[2] * self.image_size
+                h = label[3] * self.image_size
+                x = label[0] * self.image_size - w / 2
+                y = label[1] * self.image_size - h / 2
+
+                rect = Rectangle((x, y), w, h, linewidth=1,
+                                 edgecolor='r', facecolor='none')
+
+                ax.add_patch(rect)
+
+        plt.show()
+
+        lables = np.reshape(lables, (self.grid_size ** 2, 5))
+        lables = lables[lables[:, 4].argsort()][::-1]
+
+        for label in lables:
+            if label[4] < 0.05:
+                break
+
+            print(label[4])
+
+            fig, ax = plt.subplots(1)
+            ax.imshow(image)
+
+            w = label[2] * self.image_size
+            h = label[3] * self.image_size
+            x = label[0] * self.image_size - w / 2
+            y = label[1] * self.image_size - h / 2
+
+            rect = Rectangle((x, y), w, h, linewidth=1,
+                             edgecolor='r', facecolor='none')
+
+            ax.add_patch(rect)
+            plt.show()
+
+    def draw_grid(self, image, predict):
+        predict_table = PrettyTable()
+
+        for p in predict:
+            predict_table.add_row(p)
+        print(predict)
+        print(predict_table)
+
+        fig, ax = plt.subplots(1)
+        dx = int(self.image_size / self.grid_size)
+
+        grid_color = [0, 0, 0]
+
+        image[0][:, ::dx, :] = grid_color
+        image[0][::dx, :, :] = grid_color
+        ax.imshow(image[0])
+
+        plt.show()
+
 
 if __name__ == '__main__':
     with open('./config.json') as config_file:
@@ -125,4 +196,4 @@ if __name__ == '__main__':
 
     predict = Predict(config)
 
-    predict.make_predictions_for_models()
+    predict.make_predictions_for_optimizers()
