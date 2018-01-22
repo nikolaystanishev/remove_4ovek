@@ -62,7 +62,8 @@
             }
         },
         "predict": {
-            "min_probability": 0.5
+            "iou_threshold": 0.5,
+            "prob_threshold": 0.5
         }
     }
 }
