@@ -64,8 +64,7 @@ def fmeasure(y_true, y_pred):
 class EvalMetrics:
 
     def __init__(self, config):
-        self.min_probability = config['network']['predict']['min_probability']
-        self.iou_threshold = config['network']['predict']['min_probability']
+        self.iou_threshold = config['network']['predict']['iou_threshold']
         self.prob_threshold = config['network']['predict']['prob_threshold']
 
         self.image_size = config['image_info']['image_size']
@@ -145,35 +144,34 @@ class EvalMetrics:
                                     (self.number_of_annotations + 1)))
 
         labels_corners = self.get_corners_from_labels(labels)
-        prediction_corners = self.get_corners_from_labels(prediction)
+        predictions_corners = self.get_corners_from_labels(prediction)
 
         iou = np.ndarray(shape=(0, self.grid_size ** 2, self.grid_size ** 2),
                          dtype=np.float32)
 
-        for num in range(labels_corners.shape[0]):
+        for batch in range(labels_corners.shape[0]):
             iou_batch = np.ndarray(shape=(0, self.grid_size ** 2),
                                    dtype=np.float32)
-            for t_b in range(self.grid_size ** 2):
+            for box in range(self.grid_size ** 2):
                 label_corners = np.full([self.grid_size ** 2,
                                          (self.number_of_annotations + 1)],
-                                        labels_corners[num][t_b])
+                                        labels_corners[batch][box])
 
-                iou_t_b = self.boxes_iou(label_corners,
-                                         prediction_corners[num])
-                iou_t_b = np.expand_dims(iou_t_b, axis=0)
+                iou_box = self.boxes_iou(label_corners,
+                                         predictions_corners[batch])
+                iou_box = np.expand_dims(iou_box, axis=0)
 
-                iou_batch = np.concatenate((iou_batch, iou_t_b))
+                iou_batch = np.concatenate((iou_batch, iou_box))
 
             iou_batch = np.expand_dims(iou_batch, axis=0)
             iou = np.concatenate((iou, iou_batch))
 
         iou = np.amax(iou, axis=2)
-
         best_iou = iou[np.where(iou > self.iou_threshold)]
 
         predicted_correct = best_iou.shape[0]
-        predicted_proposals = prediction_corners[
-            np.where(prediction_corners[:, :, 4] > self.prob_threshold)]\
+        predicted_proposals = predictions_corners[
+            np.where(predictions_corners[:, :, 4] > self.prob_threshold)]\
             .shape[0]
         total_true = labels[np.where(labels[:, :, 4] == 1)].shape[0]
         best_iou = np.sum(best_iou)
@@ -186,7 +184,7 @@ class EvalMetrics:
         return avg_iou, precision, recall, f1_score
 
     def get_corners_from_labels(self, labels):
-        corners = labels
+        corners = np.array(labels, copy=True)
 
         corners[:, :, 0] =\
             (labels[:, :, 0] - (labels[:, :, 2] / 2)) * self.image_size
@@ -200,17 +198,29 @@ class EvalMetrics:
         return corners
 
     def boxes_iou(self, box1, box2):
-        xA = np.maximum(box1[:, 0], box2[:, 0])
-        yA = np.maximum(box1[:, 1], box2[:, 1])
-        xB = np.minimum(box1[:, 2], box2[:, 2])
-        yB = np.minimum(box1[:, 3], box2[:, 3])
+        ymin_1 = np.minimum(box1[:, 0], box1[:, 2])
+        xmin_1 = np.minimum(box1[:, 1], box1[:, 3])
+        ymax_1 = np.maximum(box1[:, 0], box1[:, 2])
+        xmax_1 = np.maximum(box1[:, 1], box1[:, 3])
+        ymin_2 = np.minimum(box2[:, 0], box2[:, 2])
+        xmin_2 = np.minimum(box2[:, 1], box2[:, 3])
+        ymax_2 = np.maximum(box2[:, 0], box2[:, 2])
+        xmax_2 = np.maximum(box2[:, 1], box2[:, 3])
 
-        interArea = (xB - xA) * (yB - yA)
+        area_1 = (ymax_1 - ymin_1) * (xmax_1 - xmin_1)
+        area_2 = (ymax_2 - ymin_2) * (xmax_2 - xmin_2)
 
-        box1Area = (box1[:, 2] - box1[:, 0]) * (box1[:, 3] - box1[:, 1])
-        box2Area = (box2[:, 2] - box2[:, 0]) * (box2[:, 3] - box2[:, 1])
+        ymin_inter = np.maximum(ymin_1, ymin_2)
+        xmin_inter = np.maximum(xmin_1, xmin_2)
+        ymax_inter = np.minimum(ymax_1, ymax_2)
+        xmax_inter = np.minimum(xmax_1, xmax_2)
 
-        iou = interArea / (box1Area + box2Area - interArea)
+        area_inter = (np.maximum(ymax_inter - ymin_inter, 0.0) *
+                      np.maximum(xmax_inter - xmin_inter, 0.0))
+
+        iou = area_inter / (area_1 + area_2 - area_inter)
+
+        iou[np.where(area_1 < 0) or np.where(area_2 < 0)] = 0
 
         return iou
 
