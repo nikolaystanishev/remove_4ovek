@@ -4,7 +4,7 @@ import json
 import tensorflow as tf
 import keras.backend as K
 
-from network import YOLO
+from Aovek.network.network import YOLO
 
 
 def precision(y_true, y_pred):

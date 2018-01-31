@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 from prettytable import PrettyTable
 
-from network import YOLO
+from Aovek.network.network import YOLO
 
 
 class Train:
