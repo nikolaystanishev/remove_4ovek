@@ -50,7 +50,8 @@ class YOLO:
         self.model_json_structure_file =\
             config['network']['json_model_structure']
 
-        self.min_probability = config['network']['predict']['min_probability']
+        self.iou_threshold = config['network']['predict']['iou_threshold']
+        self.prob_threshold = config['network']['predict']['prob_threshold']
 
         self.model = self.create_model()
 
@@ -300,6 +301,12 @@ class YOLO:
         predict = self.model.predict(image)
 
         predict = self.boxes_to_corners(predict)
+
+        return predict
+
+    def predict_boxes(self, image):
+        predict = self.model.predict(image)
+
         true_boxes = self.non_max_suppression(predict)
 
         return true_boxes
@@ -319,14 +326,17 @@ class YOLO:
         return corners_prediction
 
     def non_max_suppression(self, predict):
-        predict = np.reshape(predict, (self.grid_size ** 2, 5))
-        predict = predict[predict[:, 4] > self.min_probability]
+        predict = np.reshape(predict, (self.grid_size ** 2,
+                                       self.number_of_annotations + 1))
+        predict = predict[predict[:, 4] > self.prob_threshold]
 
         probabilities = predict[:, 4]
         boxes = predict[:, :4]
 
-        true_boxes_idx = tf.image.non_max_suppression(boxes, probabilities,
-                                                      self.grid_size ** 2)
+        true_boxes_idx =\
+            tf.image.non_max_suppression(boxes, probabilities,
+                                         self.grid_size ** 2,
+                                         iou_threshold=self.iou_threshold)
         true_boxes = tf.gather(boxes, true_boxes_idx)
         true_probabilities = tf.gather(probabilities, true_boxes_idx)
 
