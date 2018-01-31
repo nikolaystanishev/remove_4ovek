@@ -105,3 +105,6 @@ dataset/
 
 # models
 model/
+
+# database
+db.sqlite3
