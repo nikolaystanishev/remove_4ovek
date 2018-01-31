@@ -1,6 +1,7 @@
 import numpy as np
 import pickle
 import json
+import tensorflow as tf
 import keras.backend as K
 
 from network import YOLO
@@ -68,20 +69,11 @@ class EvalMetrics:
         self.prob_threshold = config['network']['predict']['prob_threshold']
 
         self.image_size = config['image_info']['image_size']
-        self.grid_size = config['label_info']['grid_size']
         self.number_of_annotations =\
             config['label_info']['number_of_annotations']
-        self.batch_size = config['network']['train']['batch_size']
-
-        self.avg_iou = 0
-        self.correct = 0
-        self.proposals = 0
-        self.total = 0
-
-        self.precision = 0
-        self.recall = 0
 
         self.network = YOLO(config)
+        self.network.load_model()
 
         self.train_pickle_name = config['dataset']['pickle_name']['train']
         self.validation_pickle_name =\
@@ -92,26 +84,21 @@ class EvalMetrics:
         train_data, train_labels, validation_data, validation_labels,\
             test_data, test_labels = self.load_data()
 
-        avg_iou, precision, recall, f1_score =\
-            self.eval_pickle_metrics(train_data, train_labels)
-
         print('Train:')
-        print('IOU: {}, Precision: {}, Recall: {}, F1 Score: {}'
-              .format(avg_iou, precision, recall, f1_score))
-
-        avg_iou, precision, recall, f1_score =\
-            self.eval_pickle_metrics(validation_data, validation_labels)
+        self.eval_dataset_metrics(train_data, train_labels)
 
         print('Validation:')
-        print('IOU: {}, Precision: {}, Recall: {}, F1 Score: {}'
-              .format(avg_iou, precision, recall, f1_score))
-
-        avg_iou, precision, recall, f1_score =\
-            self.eval_pickle_metrics(test_data, test_labels)
+        self.eval_dataset_metrics(validation_data, validation_labels)
 
         print('Test:')
-        print('IOU: {}, Precision: {}, Recall: {}, F1 Score: {}'
-              .format(avg_iou, precision, recall, f1_score))
+        self.eval_dataset_metrics(test_data, test_labels)
+
+    def eval_dataset_metrics(self, data, labels):
+        avg_iou, accuracy, precision, recall, f1_score =\
+            self.eval_metrics(data, labels)
+
+        print('IOU: {}, Accuracy: {}, Precision: {}, Recall: {}, F1 Score: {}'
+              .format(avg_iou, accuracy, precision, recall, f1_score))
 
     def load_data(self):
         train_data, train_labels =\
@@ -132,68 +119,114 @@ class EvalMetrics:
             del dataset
         return data, labels
 
-    def eval_pickle_metrics(self, data, labels):
+    def eval_metrics(self, data, labels):
         labels =\
             np.reshape(labels, (-1, self.grid_size ** 2,
                                 (self.number_of_annotations + 1)))
 
-        prediction = self.network.predict(data)
-        del data
-        prediction =\
-            np.reshape(prediction, (-1, self.grid_size ** 2,
-                                    (self.number_of_annotations + 1)))
+        iou, gt_num, tp, fp, fn = self.get_metrics_params(data, labels)
 
-        labels_corners = self.get_corners_from_labels(labels)
-        predictions_corners = self.get_corners_from_labels(prediction)
+        iou, accuracy, precision, recall, f1_score =\
+            self.calculate_metrics(iou, gt_num, tp, fp, fn)
 
-        iou = np.ndarray(shape=(0, self.grid_size ** 2, self.grid_size ** 2),
-                         dtype=np.float32)
+        return iou, accuracy, precision, recall, f1_score
 
-        for batch in range(labels_corners.shape[0]):
-            iou_batch = np.ndarray(shape=(0, self.grid_size ** 2),
-                                   dtype=np.float32)
-            for box in range(self.grid_size ** 2):
-                label_corners = np.full([self.grid_size ** 2,
-                                         (self.number_of_annotations + 1)],
-                                        labels_corners[batch][box])
+    def get_metrics_params(self, images, labels):
+        iou = 0
+        gt_num = 0
 
-                iou_box = self.boxes_iou(label_corners,
-                                         predictions_corners[batch])
-                iou_box = np.expand_dims(iou_box, axis=0)
+        tp = 0
+        fp = 0
+        fn = 0
 
-                iou_batch = np.concatenate((iou_batch, iou_box))
+        for image, label in zip(images, labels):
+            iou_image, gt_num_image, tp_image, fp_image, fn_image =\
+                self.get_one_image_metrics_params(image, label)
 
-            iou_batch = np.expand_dims(iou_batch, axis=0)
-            iou = np.concatenate((iou, iou_batch))
+            iou += iou_image
+            gt_num += gt_num_image
 
-        iou = np.amax(iou, axis=2)
-        best_iou = iou[np.where(iou > self.iou_threshold)]
+            tp += tp_image
+            fp += fp_image
+            fn += fn_image
 
-        predicted_correct = best_iou.shape[0]
-        predicted_proposals = predictions_corners[
-            np.where(predictions_corners[:, :, 4] > self.prob_threshold)]\
-            .shape[0]
-        total_true = labels[np.where(labels[:, :, 4] == 1)].shape[0]
-        best_iou = np.sum(best_iou)
+        return iou, gt_num, tp, fp, fn
 
-        avg_iou = best_iou / predicted_correct
-        precision = predicted_correct / predicted_proposals
-        recall = predicted_correct / total_true
+    def get_one_image_metrics_params(self, image, label):
+        gt = label[np.where(label[:, 4] == 1)]
+        gt = self.get_corners_from_labels(gt)
+
+        image = np.expand_dims(image, axis=0)
+        pred = self.network.predict_boxes(image)
+        pred[:, :4] = pred[:, :4] * self.image_size
+
+        iou_image = self.get_iou_for_image(gt, pred)
+
+        iou, gt_num, tp, fp, fn =\
+            self.get_metrics_params_from_iou(iou_image, gt, pred)
+
+        return iou, gt_num, tp, fp, fn
+
+    def get_iou_for_image(self, gt, pred):
+        iou_image = np.ndarray(shape=(0, pred.shape[0]),
+                               dtype=np.float32)
+
+        for box in gt:
+            gt_box = np.full(pred.shape, box)
+
+            iou_box = self.boxes_iou(gt_box, pred)
+
+            iou_box = np.expand_dims(iou_box, axis=0)
+            iou_image = np.concatenate((iou_image, iou_box))
+
+        return iou_image
+
+    def get_metrics_params_from_iou(self, iou_image, gt, pred):
+        if iou_image.shape[1] != 0:
+            iou_image = np.amax(iou_image, axis=1)
+            iou_image = iou_image.flatten()
+
+            gt_num = gt.shape[0]
+
+            true_boxes =\
+                iou_image[np.where(iou_image >= self.iou_threshold)]
+
+            tp = true_boxes.shape[0]
+            fp = pred.shape[0] - true_boxes.shape[0]
+            fn = gt.shape[0] - true_boxes.shape[0]
+            iou = np.sum(true_boxes)
+        else:
+            iou = 0
+            gt_num = gt.shape[0]
+
+            tp = 0
+            fp = pred.shape[0]
+            fn = gt.shape[0]
+
+        return iou, gt_num, tp, fp, fn
+
+    def calculate_metrics(self, iou, gt_num, tp, fp, fn):
+        iou = iou / tp
+
+        accuracy = tp / gt_num
+
+        precision = tp / (tp + fp)
+        recall = tp / (tp + fn)
         f1_score = (2 * precision * recall) / (precision + recall)
 
-        return avg_iou, precision, recall, f1_score
+        return iou, accuracy, precision, recall, f1_score
 
     def get_corners_from_labels(self, labels):
         corners = np.array(labels, copy=True)
 
-        corners[:, :, 0] =\
-            (labels[:, :, 0] - (labels[:, :, 2] / 2)) * self.image_size
-        corners[:, :, 1] =\
-            (labels[:, :, 1] - (labels[:, :, 3] / 2)) * self.image_size
-        corners[:, :, 2] =\
-            (labels[:, :, 0] + (labels[:, :, 2] / 2)) * self.image_size
-        corners[:, :, 3] =\
-            (labels[:, :, 1] + (labels[:, :, 3] / 2)) * self.image_size
+        corners[:, 0] =\
+            (labels[:, 0] - (labels[:, 2] / 2)) * self.image_size
+        corners[:, 1] =\
+            (labels[:, 1] - (labels[:, 3] / 2)) * self.image_size
+        corners[:, 2] =\
+            (labels[:, 0] + (labels[:, 2] / 2)) * self.image_size
+        corners[:, 3] =\
+            (labels[:, 1] + (labels[:, 3] / 2)) * self.image_size
 
         return corners
 
@@ -229,5 +262,6 @@ if __name__ == '__main__':
     with open('./config.json') as config_file:
         config = json.load(config_file)
 
-    eval_metrics = EvalMetrics(config)
-    eval_metrics.eval_pickles_metrics()
+    with tf.Session():
+        eval_metrics = EvalMetrics(config)
+        eval_metrics.eval_pickles_metrics()
