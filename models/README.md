@@ -1,2 +1,2 @@
-# Aovek_models
+# models
 Directory for neural network models
