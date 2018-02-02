@@ -8,7 +8,7 @@ from keras.initializers import RandomNormal
 import json
 import numpy as np
 
-from Aovek.validate.metrics import precision, recall, fmeasure
+from aovek.validate.metrics import precision, recall, fmeasure
 
 import tensorflow as tf
 sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))

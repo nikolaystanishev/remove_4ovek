@@ -10,7 +10,7 @@ from matplotlib.patches import Rectangle
 from prettytable import PrettyTable
 import tensorflow as tf
 
-from Aovek.network.network import YOLO
+from aovek.network.network import YOLO
 
 
 class Predict:
