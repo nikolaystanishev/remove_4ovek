@@ -324,7 +324,7 @@ class YOLO:
         return predict
 
     def predict_boxes(self, image):
-        predict = self.model.predict(image)
+        predict = self.predict(image)
 
         true_boxes = self.non_max_suppression(predict)
 
