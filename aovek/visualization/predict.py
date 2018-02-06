@@ -8,7 +8,6 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 from prettytable import PrettyTable
-import tensorflow as tf
 
 from aovek.network.network import YOLO
 
@@ -17,6 +16,7 @@ class Predict:
 
     def __init__(self, config):
         self.network = YOLO(config)
+        self.network.load_model()
 
         self.image_size = config['image_info']['image_size']
         self.pixel_depth = config['image_info']['pixel_depth']
@@ -29,16 +29,23 @@ class Predict:
             config['dataset']['dataset_images']['validation_folder']
         self.test_folder = config['dataset']['dataset_images']['test_folder']
 
-        self.models = {'49': './model/49/model.h5'}
+        self.models = {'52': './model/52/model.h5'}
 
     def predict(self, image_file):
         image = self.get_image_from_file(image_file)
 
-        predict = self.network.predict(image)
+        predict = self.network.predict_boxes(image)
 
         self.draw_rectangles(image[0], predict)
 
         return predict
+
+    def predict_image(self, image_file):
+        image = self.get_image_from_file(image_file)
+
+        predict = self.network.predict_boxes(image)
+
+        self.draw_rectangles(image[0], predict)
 
     def get_image_from_file(self, image_file):
         image_data = ndimage.imread(image_file).astype(float)
@@ -172,7 +179,6 @@ if __name__ == '__main__':
     with open('./config.json') as config_file:
         config = json.load(config_file)
 
-    with tf.Session():
-        predict = Predict(config)
+    predict = Predict(config)
 
-        predict.make_predictions_for_optimizers()
+    predict.make_predictions_for_optimizers()
