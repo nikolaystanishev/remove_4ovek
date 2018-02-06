@@ -4,10 +4,7 @@ import tarfile
 import os
 
 
-def download_dataset():
-    with open('./config.json') as config_file:
-        config = json.load(config_file)
-
+def download_dataset(config):
     url = config["dataset"]["url"]
     path = config["dataset"]["path"]
 
@@ -26,4 +23,7 @@ def download_dataset():
 
 
 if __name__ == '__main__':
-    download_dataset()
+    with open('./config.json') as config_file:
+        config = json.load(config_file)
+
+    download_dataset(config)
