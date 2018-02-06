@@ -1,135 +1,25 @@
 import numpy as np
-import pickle
-import json
-import tensorflow as tf
-import keras.backend as K
-
-from aovek.network.network import YOLO
 
 
-def precision(y_true, y_pred):
-    '''Calculates the precision, a metric for multi-label classification of
-    how many selected items are relevant.
-    '''
-    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-    predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
-    precision = true_positives / (predicted_positives + K.epsilon())
-    return precision
-
-
-def recall(y_true, y_pred):
-    '''Calculates the recall, a metric for multi-label classification of
-    how many relevant items are selected.
-    '''
-    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-    possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
-    recall = true_positives / (possible_positives + K.epsilon())
-    return recall
-
-
-def fbeta_score(y_true, y_pred, beta=1):
-    '''Calculates the F score, the weighted harmonic mean of precision and recall.
-
-    This is useful for multi-label classification, where input samples can be
-    classified as sets of labels. By only using accuracy (precision) a model
-    would achieve a perfect score by simply assigning every class to every
-    input. In order to avoid this, a metric should penalize incorrect class
-    assignments as well (recall). The F-beta score (ranged from 0.0 to 1.0)
-    computes this, as a weighted mean of the proportion of correct class
-    assignments vs. the proportion of incorrect class assignments.
-
-    With beta = 1, this is equivalent to a F-measure. With beta < 1, assigning
-    correct classes becomes more important, and with beta > 1 the metric is
-    instead weighted towards penalizing incorrect class assignments.
-    '''
-    if beta < 0:
-        raise ValueError('The lowest choosable beta is zero (only precision).')
-
-    # If there are no true positives, fix the F score at 0 like sklearn.
-    if K.sum(K.round(K.clip(y_true, 0, 1))) == 0:
-        return 0
-
-    p = precision(y_true, y_pred)
-    r = recall(y_true, y_pred)
-    bb = beta ** 2
-    fbeta_score = (1 + bb) * (p * r) / (bb * p + r + K.epsilon())
-    return fbeta_score
-
-
-def fmeasure(y_true, y_pred):
-    '''Calculates the f-measure, the harmonic mean of precision and recall.
-    '''
-    return fbeta_score(y_true, y_pred, beta=1)
-
-
-class EvalMetrics:
+class Metrics:
 
     def __init__(self, config):
         self.iou_threshold = config['network']['predict']['iou_threshold']
         self.prob_threshold = config['network']['predict']['prob_threshold']
 
         self.image_size = config['image_info']['image_size']
+        self.grid_size = config['label_info']['grid_size']
         self.number_of_annotations =\
             config['label_info']['number_of_annotations']
 
-        self.network = YOLO(config)
-        self.network.load_model()
-
-        self.train_pickle_name = config['dataset']['pickle_name']['train']
-        self.validation_pickle_name =\
-            config['dataset']['pickle_name']['validation']
-        self.test_pickle_name = config['dataset']['pickle_name']['test']
-
-    def eval_pickles_metrics(self):
-        train_data, train_labels, validation_data, validation_labels,\
-            test_data, test_labels = self.load_data()
-
-        print('Train:')
-        self.eval_dataset_metrics(train_data, train_labels)
-
-        print('Validation:')
-        self.eval_dataset_metrics(validation_data, validation_labels)
-
-        print('Test:')
-        self.eval_dataset_metrics(test_data, test_labels)
-
-    def eval_dataset_metrics(self, data, labels):
-        avg_iou, accuracy, precision, recall, f1_score =\
-            self.eval_metrics(data, labels)
-
-        print('IOU: {}, Accuracy: {}, Precision: {}, Recall: {}, F1 Score: {}'
-              .format(avg_iou, accuracy, precision, recall, f1_score))
-
-    def load_data(self):
-        train_data, train_labels =\
-            self.get_data_from_pickle(self.train_pickle_name)
-        validation_data, validation_labels =\
-            self.get_data_from_pickle(self.validation_pickle_name)
-        test_data, test_labels =\
-            self.get_data_from_pickle(self.test_pickle_name)
-
-        return train_data, train_labels, validation_data, validation_labels,\
-            test_data, test_labels
-
-    def get_data_from_pickle(self, pickle_name):
-        with open(pickle_name, 'rb') as dsp:
-            dataset = pickle.load(dsp)
-            data = dataset['data']
-            labels = dataset['labels']
-            del dataset
-        return data, labels
-
-    def eval_metrics(self, data, labels):
-        labels =\
-            np.reshape(labels, (-1, self.grid_size ** 2,
-                                (self.number_of_annotations + 1)))
-
-        iou, gt_num, tp, fp, fn = self.get_metrics_params(data, labels)
+    def eval_metrics(self, images, labels):
+        iou, gt_num, tp, fp, fn = self.get_metrics_params(images, labels)
 
         iou, accuracy, precision, recall, f1_score =\
             self.calculate_metrics(iou, gt_num, tp, fp, fn)
 
-        return iou, accuracy, precision, recall, f1_score
+        return {'iou': iou, 'precision': precision, 'recall': recall,
+                'f1_score': f1_score}
 
     def get_metrics_params(self, images, labels):
         iou = 0
@@ -153,6 +43,9 @@ class EvalMetrics:
         return iou, gt_num, tp, fp, fn
 
     def get_one_image_metrics_params(self, image, label):
+        label = np.reshape(label, (self.grid_size ** 2,
+                                   (self.number_of_annotations + 1)))
+
         gt = label[np.where(label[:, 4] == 1)]
         gt = self.get_corners_from_labels(gt)
 
@@ -206,15 +99,22 @@ class EvalMetrics:
         return iou, gt_num, tp, fp, fn
 
     def calculate_metrics(self, iou, gt_num, tp, fp, fn):
-        iou = iou / tp
+        iou = self.save_div(iou, tp)
 
-        accuracy = tp / gt_num
+        accuracy = self.save_div(tp, gt_num)
 
-        precision = tp / (tp + fp)
-        recall = tp / (tp + fn)
-        f1_score = (2 * precision * recall) / (precision + recall)
+        precision = self.save_div(tp, (tp + fp))
+        recall = self.save_div(tp, (tp + fn))
+        f1_score = self.save_div((2 * precision * recall),
+                                 (precision + recall))
 
         return iou, accuracy, precision, recall, f1_score
+
+    def save_div(self, num1, num2):
+        try:
+            return num1 / num2
+        except ZeroDivisionError:
+            return 0
 
     def get_corners_from_labels(self, labels):
         corners = np.array(labels, copy=True)
@@ -256,12 +156,3 @@ class EvalMetrics:
         iou[np.where(area_1 < 0) or np.where(area_2 < 0)] = 0
 
         return iou
-
-
-if __name__ == '__main__':
-    with open('./config.json') as config_file:
-        config = json.load(config_file)
-
-    with tf.Session():
-        eval_metrics = EvalMetrics(config)
-        eval_metrics.eval_pickles_metrics()

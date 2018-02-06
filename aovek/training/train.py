@@ -118,7 +118,7 @@ _________________________________________________________________
 
         temp_model_history.add_column(
             'Epoch', ['Epoch ' + str(el)
-                      for el in range(1, len(model_history['acc']) + 1)])
+                      for el in range(1, len(model_history['iou']) + 1)])
         for k, v in sorted(model_history.items()):
             temp_model_history.add_column(k, v)
 
@@ -145,29 +145,30 @@ _________________________________________________________________
 
         temp_metrics = PrettyTable()
 
-        temp_metrics.add_column('Metrics', ['Test Metrics', 'Train Metrics',
-                                            'Validation Metrics'])
+        temp_metrics.add_column('Metrics', ['Train Metrics',
+                                            'Validation Metrics',
+                                            'Test Metrics'])
 
         temp_metrics.add_column('Loss',
-                                [metrics['loss']['test_loss'],
-                                 metrics['loss']['train_loss'],
-                                 metrics['loss']['validation_loss']])
-        temp_metrics.add_column('Accuracy',
-                                [metrics['accuracy']['test_accuracy'],
-                                 metrics['accuracy']['train_accuracy'],
-                                 metrics['accuracy']['validation_accuracy']])
+                                [metrics['loss']['train_loss'],
+                                 metrics['loss']['validation_loss'],
+                                 metrics['loss']['test_loss']])
+        temp_metrics.add_column('IoU',
+                                [metrics['iou']['train_iou'],
+                                 metrics['iou']['validation_iou'],
+                                 metrics['iou']['test_iou']])
         temp_metrics.add_column('Precision',
-                                [metrics['precision']['test_precision'],
-                                 metrics['precision']['train_precision'],
-                                 metrics['precision']['validation_precision']])
+                                [metrics['precision']['train_precision'],
+                                 metrics['precision']['validation_precision'],
+                                 metrics['precision']['test_precision']])
         temp_metrics.add_column('Recall',
-                                [metrics['recall']['test_recall'],
-                                 metrics['recall']['train_recall'],
-                                 metrics['recall']['validation_recall']])
+                                [metrics['recall']['train_recall'],
+                                 metrics['recall']['validation_recall'],
+                                 metrics['recall']['test_recall']])
         temp_metrics.add_column('F1 Score',
-                                [metrics['f1_score']['test_f1_score'],
-                                 metrics['f1_score']['train_f1_score'],
-                                 metrics['f1_score']['validation_f1_score']])
+                                [metrics['f1_score']['train_f1_score'],
+                                 metrics['f1_score']['validation_f1_score'],
+                                 metrics['f1_score']['test_f1_score']])
 
         metrics_log = str(temp_metrics)
 

@@ -8,7 +8,7 @@ from keras.initializers import RandomNormal
 import json
 import numpy as np
 
-from aovek.validate.metrics import precision, recall, fmeasure
+from aovek.validate.model_metrics import ModelMetrics
 
 import tensorflow as tf
 sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
@@ -40,9 +40,10 @@ class YOLO:
 
         self.optimizer = None
 
+        self.metrics = None
         self.history = History()
 
-        self.metrics = None
+        self.model_metrics = None
         self.model_structure = None
 
         self.model_binary_data_file =\
@@ -66,8 +67,7 @@ class YOLO:
         self.optimizer = self.create_optimizer()
 
         model.compile(optimizer=self.optimizer,
-                      loss=self.custom_loss,
-                      metrics=['accuracy', precision, recall, fmeasure])
+                      loss=self.custom_loss)
 
         model.summary()
         return model
@@ -233,12 +233,15 @@ class YOLO:
 
     def train(self, train_data, train_labels, validation_data,
               validation_labels):
+        self.metrics = ModelMetrics(validation_data, validation_labels,
+                                    self)
+
         self.model.fit(train_data, train_labels,
                        batch_size=self.batch_size,
                        epochs=self.number_of_epochs,
                        validation_data=(validation_data, validation_labels),
                        shuffle=True,
-                       callbacks=[self.history])
+                       callbacks=[self.history, self.metrics])
 
     def custom_loss(self, true, pred):
         loss = 0
@@ -340,8 +343,8 @@ class YOLO:
         true_boxes = tf.gather(boxes, true_boxes_idx)
         true_probabilities = tf.gather(probabilities, true_boxes_idx)
 
-        true_boxes = np.array(true_boxes.eval())
-        true_probabilities = np.array(true_probabilities.eval())
+        true_boxes = np.array(sess.run(true_boxes))
+        true_probabilities = np.array(sess.run(true_probabilities))
 
         true_boxes = np.append(true_boxes, true_probabilities[:, None], axis=1)
 
@@ -380,16 +383,27 @@ class YOLO:
 
     def summary(self, train_data, train_labels, validation_data,
                 validation_labels, test_data, test_labels):
-        self.metrics =\
+        self.model_metrics =\
             self.genarate_metrics(train_data, train_labels, validation_data,
                                   validation_labels, test_data, test_labels)
         self.model_structure = self.genarate_model_structure()
 
     def genarate_metrics(self, train_data, train_labels, validation_data,
                          validation_labels, test_data, test_labels):
-        metrics =\
-            self.get_metrics_values(train_data, train_labels, validation_data,
-                                    validation_labels, test_data, test_labels)
+        train_metrics =\
+            self.metrics.eval_model_metrics(train_data, train_labels)
+        validation_metrics =\
+            self.metrics.eval_model_metrics(validation_data, validation_labels)
+        test_metrics = self.metrics.eval_model_metrics(test_data, test_labels)
+
+        train_loss = self.model.evaluate(train_data, train_labels)
+        validation_loss =\
+            self.model.evaluate(validation_data, validation_labels)
+        test_loss = self.model.evaluate(test_data, test_labels)
+
+        metrics = self.get_metrics_values(train_metrics, validation_metrics,
+                                          test_metrics, train_loss,
+                                          validation_loss, test_loss)
 
         return metrics
 
@@ -400,44 +414,41 @@ class YOLO:
 
         return model_structure
 
-    def get_metrics_values(self, train_data, train_labels, validation_data,
-                           validation_labels, test_data, test_labels):
-        test_metrics = self.model.evaluate(test_data, test_labels)
-        train_metrics = self.model.evaluate(train_data, train_labels)
-        validation_metrics =\
-            self.model.evaluate(validation_data, validation_labels)
+    def get_metrics_values(self, train_metrics, validation_metrics,
+                           test_metrics, train_loss, validation_loss,
+                           test_loss):
+        loss = {'train_loss': train_loss,
+                'validation_loss': validation_loss,
+                'test_loss': test_loss}
 
-        loss = {'test_loss': test_metrics[0],
-                'train_loss': train_metrics[0],
-                'validation_loss': validation_metrics[0]}
+        iou = {'train_iou': train_metrics['iou'],
+               'validation_iou': validation_metrics['iou'],
+               'test_iou': test_metrics['iou']}
 
-        accuracy = {'test_accuracy': test_metrics[1],
-                    'train_accuracy': train_metrics[1],
-                    'validation_accuracy': validation_metrics[1]}
+        precision = {'train_precision': train_metrics['precision'],
+                     'validation_precision': validation_metrics['precision'],
+                     'test_precision': test_metrics['precision']}
 
-        precision = {'test_precision': test_metrics[2],
-                     'train_precision': train_metrics[2],
-                     'validation_precision': validation_metrics[2]}
+        recall = {'train_recall': train_metrics['recall'],
+                  'validation_recall': validation_metrics['recall'],
+                  'test_recall': test_metrics['recall']}
 
-        recall = {'test_recall': test_metrics[3],
-                  'train_recall': train_metrics[3],
-                  'validation_recall': validation_metrics[3]}
+        f1_score = {'train_f1_score': train_metrics['f1_score'],
+                    'validation_f1_score': validation_metrics['f1_score'],
+                    'test_f1_score': test_metrics['f1_score']}
 
-        f1_score = {'test_f1_score': test_metrics[4],
-                    'train_f1_score': train_metrics[4],
-                    'validation_f1_score': validation_metrics[4]}
-
-        return {'loss': loss, 'accuracy': accuracy, 'precision': precision,
+        return {'loss': loss, 'iou': iou, 'precision': precision,
                 'recall': recall, 'f1_score': f1_score}
 
     def get_metrics(self):
-        return self.metrics
+        return self.model_metrics
 
     def get_model_structure(self):
         return self.model_structure
 
     def get_model_history(self):
-        return self.history.history
+        return {**self.history.history,
+                **self.metrics.get_validation_metrics()}
 
     def get_optimizer_params(self):
         return self.optimizer.get_config()
