@@ -1,5 +1,6 @@
 from keras.models import Model
-from keras.layers import Input, Conv2D, MaxPooling2D, Reshape
+from keras.layers import Input, Conv2D, MaxPooling2D, Reshape,\
+    BatchNormalization, LeakyReLU
 from keras.models import load_model
 from keras.models import model_from_json
 from keras.callbacks import History
@@ -77,10 +78,11 @@ class YOLO:
                          kernel_size=(3, 3),
                          strides=(1, 1),
                          padding='same',
-                         activation='relu',
                          name='conv_1',
                          kernel_initializer=RandomNormal(),
                          use_bias=True)(input)
+        network = BatchNormalization(name='norm_1')(network)
+        network = LeakyReLU(alpha=0.1, name='relu_1')(network)
         network = MaxPooling2D(pool_size=(2, 2),
                                name='pool_1')(network)
 
@@ -88,10 +90,11 @@ class YOLO:
                          kernel_size=(3, 3),
                          strides=(1, 1),
                          padding='same',
-                         activation='relu',
                          name='conv_2',
                          kernel_initializer=RandomNormal(),
                          use_bias=True)(network)
+        network = BatchNormalization(name='norm_2')(network)
+        network = LeakyReLU(alpha=0.1, name='relu_2')(network)
         network = MaxPooling2D(pool_size=(2, 2),
                                name='pool_2')(network)
 
@@ -99,26 +102,29 @@ class YOLO:
                          kernel_size=(3, 3),
                          strides=(1, 1),
                          padding='same',
-                         activation='relu',
                          name='conv_3',
                          kernel_initializer=RandomNormal(),
                          use_bias=True)(network)
+        network = BatchNormalization(name='norm_3')(network)
+        network = LeakyReLU(alpha=0.1, name='relu_3')(network)
         network = Conv2D(filters=64,
                          kernel_size=(1, 1),
                          strides=(1, 1),
                          padding='same',
-                         activation='relu',
                          name='conv_4',
                          kernel_initializer=RandomNormal(),
                          use_bias=True)(network)
+        network = BatchNormalization(name='norm_4')(network)
+        network = LeakyReLU(alpha=0.1, name='relu_4')(network)
         network = Conv2D(filters=128,
                          kernel_size=(3, 3),
                          strides=(1, 1),
                          padding='same',
-                         activation='relu',
                          name='conv_5',
                          kernel_initializer=RandomNormal(),
                          use_bias=True)(network)
+        network = BatchNormalization(name='norm_5')(network)
+        network = LeakyReLU(alpha=0.1, name='relu_5')(network)
         network = MaxPooling2D(pool_size=(2, 2),
                                name='pool_3')(network)
 
@@ -126,26 +132,29 @@ class YOLO:
                          kernel_size=(3, 3),
                          strides=(1, 1),
                          padding='same',
-                         activation='relu',
                          name='conv_6',
                          kernel_initializer=RandomNormal(),
                          use_bias=True)(network)
+        network = BatchNormalization(name='norm_6')(network)
+        network = LeakyReLU(alpha=0.1, name='relu_6')(network)
         network = Conv2D(filters=128,
                          kernel_size=(1, 1),
                          strides=(1, 1),
                          padding='same',
-                         activation='relu',
                          name='conv_7',
                          kernel_initializer=RandomNormal(),
                          use_bias=True)(network)
+        network = BatchNormalization(name='norm_7')(network)
+        network = LeakyReLU(alpha=0.1, name='relu_7')(network)
         network = Conv2D(filters=256,
                          kernel_size=(3, 3),
                          strides=(1, 1),
                          padding='same',
-                         activation='relu',
                          name='conv_8',
                          kernel_initializer=RandomNormal(),
                          use_bias=True)(network)
+        network = BatchNormalization(name='norm_8')(network)
+        network = LeakyReLU(alpha=0.1, name='relu_8')(network)
         network = MaxPooling2D(pool_size=(2, 2),
                                name='pool_4')(network)
 
@@ -153,42 +162,47 @@ class YOLO:
                          kernel_size=(3, 3),
                          strides=(1, 1),
                          padding='same',
-                         activation='relu',
                          name='conv_9',
                          kernel_initializer=RandomNormal(),
                          use_bias=True)(network)
+        network = BatchNormalization(name='norm_9')(network)
+        network = LeakyReLU(alpha=0.1, name='relu_9')(network)
         network = Conv2D(filters=256,
                          kernel_size=(1, 1),
                          strides=(1, 1),
                          padding='same',
-                         activation='relu',
                          name='conv_10',
                          kernel_initializer=RandomNormal(),
                          use_bias=True)(network)
+        network = BatchNormalization(name='norm_10')(network)
+        network = LeakyReLU(alpha=0.1, name='relu_10')(network)
         network = Conv2D(filters=512,
                          kernel_size=(3, 3),
                          strides=(1, 1),
                          padding='same',
-                         activation='relu',
                          name='conv_11',
                          kernel_initializer=RandomNormal(),
                          use_bias=True)(network)
+        network = BatchNormalization(name='norm_11')(network)
+        network = LeakyReLU(alpha=0.1, name='relu_11')(network)
         network = Conv2D(filters=256,
                          kernel_size=(1, 1),
                          strides=(1, 1),
                          padding='same',
-                         activation='relu',
                          name='conv_12',
                          kernel_initializer=RandomNormal(),
                          use_bias=True)(network)
+        network = BatchNormalization(name='norm_12')(network)
+        network = LeakyReLU(alpha=0.1, name='relu_12')(network)
         network = Conv2D(filters=512,
                          kernel_size=(3, 3),
                          strides=(1, 1),
                          padding='same',
-                         activation='relu',
                          name='conv_13',
                          kernel_initializer=RandomNormal(),
                          use_bias=True)(network)
+        network = BatchNormalization(name='norm_13')(network)
+        network = LeakyReLU(alpha=0.1, name='relu_13')(network)
         network = MaxPooling2D(pool_size=(2, 2),
                                name='pool_5')(network)
 
@@ -196,19 +210,21 @@ class YOLO:
                          kernel_size=(3, 3),
                          strides=(1, 1),
                          padding='same',
-                         activation='relu',
                          name='conv_14',
                          kernel_initializer=RandomNormal(),
                          use_bias=True)(network)
+        network = BatchNormalization(name='norm_14')(network)
+        network = LeakyReLU(alpha=0.1, name='relu_14')(network)
 
         network = Conv2D(filters=1024,
                          kernel_size=(3, 3),
                          strides=(1, 1),
                          padding='same',
-                         activation='relu',
                          name='conv_15',
                          kernel_initializer=RandomNormal(),
                          use_bias=True)(network)
+        network = BatchNormalization(name='norm_15')(network)
+        network = LeakyReLU(alpha=0.1, name='relu_15')(network)
 
         network = Conv2D(filters=(self.number_of_annotations + 1),
                          kernel_size=(1, 1),
