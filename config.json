@@ -36,7 +36,9 @@
     "image_info": {
         "image_size": 288,
         "pixel_depth": 255.0,
-        "color_channels": 3
+        "color_channels": 3,
+        "color_mode": "RGB",
+        "normalizer": "[0, 1]"
     },
 
     "label_info": {
