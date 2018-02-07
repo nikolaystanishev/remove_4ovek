@@ -1,20 +1,22 @@
 import os
 import numpy as np
-from scipy import ndimage
-from skimage.transform import resize
 import xml.etree.ElementTree as ET
 import pickle
 from PIL import Image
 from datetime import datetime
 import json
 
+from aovek.utils.image_processing import ImageProcessing
 
-class DataProcessing:
+
+class DataProcessing(ImageProcessing):
     """
         Class for processing data and loading it to pickle file
     """
 
     def __init__(self, config):
+        super().__init__(config)
+
         self.train_folder = config['dataset']['dataset_images']['train_folder']
         self.validation_folder =\
             config['dataset']['dataset_images']['validation_folder']
@@ -29,10 +31,6 @@ class DataProcessing:
 
         self.dataset_folder = config['dataset']['folder']
 
-        self.image_size = config['image_info']['image_size']
-        self.pixel_depth = config['image_info']['pixel_depth']
-        self.color_channels = config['image_info']['color_channels']
-
         self.train_pickle_name = config['dataset']['pickle_name']['train']
         self.validation_pickle_name =\
             config['dataset']['pickle_name']['validation']
@@ -41,8 +39,6 @@ class DataProcessing:
         self.grid_size = config['label_info']['grid_size']
         self.number_of_annotations =\
             config['label_info']['number_of_annotations']
-
-        self.normalizer = None
 
         self.time = None
 
@@ -182,48 +178,6 @@ class DataProcessing:
             images = np.concatenate((images, image))
             labels = np.concatenate((labels, label))
         return images, labels
-
-    def process_image(self, image_file):
-        image_data = ndimage.imread(image_file).astype(float)
-
-        if len(image_data.shape) == 2:
-            image_data = np.repeat(image_data[:, :, np.newaxis], 3, axis=2)
-
-        original_size = image_data.shape[:-1][::-1]
-
-        if image_data.shape != (self.image_size, self.image_size,
-                                self.color_channels):
-            image = resize(image_data,
-                           output_shape=(self.image_size, self.image_size),
-                           mode='constant')
-        else:
-            image = image_data
-
-        image = np.expand_dims(image, axis=0)
-
-        if self.normalizer == 0 or self.normalizer is None:
-            image = self.normalize_image_without_normalization(image)
-        elif self.normalizer == 1:
-            image = self.normalize_image_from_0_to_1(image)
-        elif self.normalizer == 2:
-            image = self.normalize_image_from_minus1_to_1(image)
-
-        return (image, original_size)
-
-    def normalize_image_from_minus1_to_1(self, image):
-        normalized_image = (image - (self.pixel_depth / 2)) / self.pixel_depth
-
-        return normalized_image
-
-    def normalize_image_from_0_to_1(self, image):
-        normalized_image = image / self.pixel_depth
-
-        return normalized_image
-
-    def normalize_image_without_normalization(self, image):
-        normalized_image = image
-
-        return normalized_image
 
     def process_image_labels(self, annotations, original_size):
         label = np.zeros((self.grid_size, self.grid_size,

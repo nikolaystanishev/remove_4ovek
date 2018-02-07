@@ -1,6 +1,4 @@
-from scipy import ndimage
 import numpy as np
-from skimage.transform import resize
 import json
 import os
 import imghdr
@@ -10,17 +8,16 @@ from matplotlib.patches import Rectangle
 from prettytable import PrettyTable
 
 from aovek.network.network import YOLO
+from aovek.utils.image_processing import ImageProcessing
 
 
-class Predict:
+class Predict(ImageProcessing):
 
     def __init__(self, config):
+        super().__init__(config)
+
         self.network = YOLO(config)
         self.network.load_model()
-
-        self.image_size = config['image_info']['image_size']
-        self.pixel_depth = config['image_info']['pixel_depth']
-        self.color_channels = config['image_info']['color_channels']
 
         self.grid_size = config['label_info']['grid_size']
 
@@ -32,7 +29,7 @@ class Predict:
         self.models = {'52': './model/52/model.h5'}
 
     def predict(self, image_file):
-        image = self.get_image_from_file(image_file)
+        image = self.process_image(image_file)
 
         predict = self.network.predict_boxes(image)
 
@@ -41,33 +38,11 @@ class Predict:
         return predict
 
     def predict_image(self, image_file):
-        image = self.get_image_from_file(image_file)
+        image = self.process_image(image_file)
 
         predict = self.network.predict_boxes(image)
 
         self.draw_rectangles(image[0], predict)
-
-    def get_image_from_file(self, image_file):
-        image_data = ndimage.imread(image_file).astype(float)
-
-        if len(image_data.shape) != self.color_channels:
-            image_data = np.repeat(image_data[:, :, np.newaxis],
-                                   self.color_channels, axis=2)
-
-        if image_data.shape != (self.image_size, self.image_size,
-                                self.color_channels):
-            image = resize(image_data,
-                           output_shape=(self.image_size,
-                                         self.image_size),
-                           mode='constant')
-        else:
-            image = image_data
-
-        image = np.expand_dims(image, axis=0)
-
-        image = self.normalize_image_from_0_to_1(image)
-
-        return image
 
     def make_predictions_for_optimizers(self):
         for optimizer, model_file in self.models.items():
@@ -120,21 +95,6 @@ class Predict:
                 for el in prediction:
                     if np.sum(el) != 0:
                             print(el)
-
-    def normalize_image_from_minus1_to_1(self, image):
-        normalized_image = (image - (self.pixel_depth / 2)) / self.pixel_depth
-
-        return normalized_image
-
-    def normalize_image_from_0_to_1(self, image):
-        normalized_image = image / self.pixel_depth
-
-        return normalized_image
-
-    def normalize_image_without_normalization(self, image):
-        normalized_image = image
-
-        return normalized_image
 
     def draw_rectangles(self, image, lables):
         fig, ax = plt.subplots(1)
