@@ -1,54 +1,30 @@
-import pickle
 import json
 
 from aovek.validate.metrics import Metrics
 from aovek.network.network import YOLO
+from aovek.utils.data_loading import DataLoading
 
 
-class EvalMetrics(Metrics):
+class EvalMetrics(Metrics, DataLoading):
 
     def __init__(self, config):
-        super().__init__(config)
+        Metrics.__init__(self, config)
+        DataLoading.__init__(self, config)
 
         self.network = YOLO(config)
         self.network.load_model()
 
-        self.train_pickle_name = config['dataset']['pickle_name']['train']
-        self.validation_pickle_name =\
-            config['dataset']['pickle_name']['validation']
-        self.test_pickle_name = config['dataset']['pickle_name']['test']
+        self.load_data()
 
     def eval_pickles_metrics(self):
-        train_data, train_labels, validation_data, validation_labels,\
-            test_data, test_labels = self.load_data()
-
         print('Train:')
-        self.eval_dataset_metrics(train_data, train_labels)
+        self.eval_dataset_metrics(self.train_data, self.train_labels)
 
         print('Validation:')
-        self.eval_dataset_metrics(validation_data, validation_labels)
+        self.eval_dataset_metrics(self.validation_data, self.validation_labels)
 
         print('Test:')
-        self.eval_dataset_metrics(test_data, test_labels)
-
-    def load_data(self):
-        train_data, train_labels =\
-            self.get_data_from_pickle(self.train_pickle_name)
-        validation_data, validation_labels =\
-            self.get_data_from_pickle(self.validation_pickle_name)
-        test_data, test_labels =\
-            self.get_data_from_pickle(self.test_pickle_name)
-
-        return train_data, train_labels, validation_data, validation_labels,\
-            test_data, test_labels
-
-    def get_data_from_pickle(self, pickle_name):
-        with open(pickle_name, 'rb') as dsp:
-            dataset = pickle.load(dsp)
-            data = dataset['data']
-            labels = dataset['labels']
-            del dataset
-        return data, labels
+        self.eval_dataset_metrics(self.test_data, self.test_labels)
 
     def eval_dataset_metrics(self, data, labels):
         metrics = self.eval_metrics(data, labels)
