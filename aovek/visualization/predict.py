@@ -29,7 +29,7 @@ class Predict(ImageProcessing):
         self.models = {'52': './model/52/model.h5'}
 
     def predict(self, image_file):
-        image = self.process_image(image_file)
+        image, _ = self.process_image(image_file)
 
         predict = self.network.predict_boxes(image)
 
@@ -38,7 +38,7 @@ class Predict(ImageProcessing):
         return predict
 
     def predict_image(self, image_file):
-        image = self.process_image(image_file)
+        image, _ = self.process_image(image_file)
 
         predict = self.network.predict_boxes(image)
 
@@ -98,7 +98,8 @@ class Predict(ImageProcessing):
 
     def draw_rectangles(self, image, lables):
         fig, ax = plt.subplots(1)
-        ax.imshow(image)
+
+        ax.imshow(np.squeeze(image))
 
         for label in lables:
             print(label[4])

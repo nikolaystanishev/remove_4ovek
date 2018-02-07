@@ -15,9 +15,11 @@ class ImageProcessing:
     def process_image(self, image_file):
         image_data =\
             ndimage.imread(image_file, mode=self.color_mode).astype(float)
-        image_data = np.expand_dims(image_data, axis=2)
 
-        original_size = image_data.shape[:-1][::-1]
+        if self.color_channels == 1:
+            image_data = np.expand_dims(image_data, axis=2)
+
+        original_size = np.squeeze(image_data).shape[::-1]
 
         if image_data.shape != (self.image_size, self.image_size,
                                 self.color_channels):
