@@ -26,8 +26,6 @@ class Predict(ImageProcessing):
             config['dataset']['dataset_images']['validation_folder']
         self.test_folder = config['dataset']['dataset_images']['test_folder']
 
-        self.models = {'52': './model/52/model.h5'}
-
     def predict(self, image_file):
         image, _ = self.process_image(image_file)
 
@@ -44,38 +42,28 @@ class Predict(ImageProcessing):
 
         self.draw_rectangles(image[0], predict)
 
-    def make_predictions_for_optimizers(self):
-        for optimizer, model_file in self.models.items():
-            start_time = datetime.now()
+    def make_predictions_for_datasets(self):
+        start_time = datetime.now()
 
-            self.network.load_model_file(model_file)
-            print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-            print(optimizer)
-            print('==========================================================')
-            print('Train')
-            print('==========================================================')
-            self.make_predictions_for_folder(self.train_folder)
-            print('==========================================================')
-            print('Validation')
-            print('==========================================================')
-            self.make_predictions_for_folder(self.validation_folder)
-            print('==========================================================')
-            print('Test')
-            print('==========================================================')
-            self.make_predictions_for_folder(self.test_folder)
-            print('==========================================================')
-            print('VOC')
-            print('==========================================================')
-            self.make_predictions_for_folder('../../../../Downloads/dataset/'
-                                             'VOCdevkit/VOC2012/JPEGImages/')
-            print('==========================================================')
+        self.make_predictions_for_dataset('Test', self.test_folder)
+        self.make_predictions_for_dataset('Train', self.train_folder)
+        self.make_predictions_for_dataset('Validation', self.validation_folder)
+        self.make_predictions_for_dataset('VOC', '../../../../Downloads/'
+                                                 'dataset/VOCdevkit/VOC2012/'
+                                                 'JPEGImages/')
 
-            end_time = datetime.now()
-            full_time = end_time - start_time
+        end_time = datetime.now()
+        full_time = end_time - start_time
 
-            print('==========================================================')
-            print('Time: {}'.format(full_time))
-            print('==========================================================')
+        print('==========================================================')
+        print('Time: {}'.format(full_time))
+        print('==========================================================')
+
+    def make_predictions_for_dataset(self, dataset, dataset_path):
+        print('==========================================================')
+        print(dataset)
+        print('==========================================================')
+        self.make_predictions_for_folder(dataset_path)
 
     def make_predictions_for_folder(self, path):
         for dirpath, dirnames, filenames in os.walk(path):
@@ -142,4 +130,4 @@ if __name__ == '__main__':
 
     predict = Predict(config)
 
-    predict.make_predictions_for_optimizers()
+    predict.make_predictions_for_datasets()
