@@ -1,6 +1,5 @@
 import argparse
 import json
-import tensorflow as tf
 
 from aovek.preprocess.download_dataset import download_dataset
 from aovek.preprocess.data_processing import DataProcessing
@@ -35,30 +34,25 @@ def dataset_download(config):
 
 def processes_dataset(config):
     dp = DataProcessing(config)
-    dp.set_normalizer(1)
     dp.pickle_dataset()
 
     print('Taken time: {}'.format(str(dp.get_time())))
 
 
 def train(config):
-    config['network']['model_binary_data_file'] = './model/54/model.h5'
-    config['network']['json_model_structure'] = './model/54/model.json'
-
     train = Train(config)
+    train.load_dataset()
+    train.train(config)
 
 
 def predict(config):
-    with tf.Session():
-        predict = Predict(config)
-
-        predict.make_predictions_for_optimizers()
+    predict = Predict(config)
+    predict.make_predictions_for_datasets()
 
 
 def evaluate(config):
-    with tf.Session():
-        eval_metrics = EvalMetrics(config)
-        eval_metrics.eval_pickles_metrics()
+    eval_metrics = EvalMetrics(config)
+    eval_metrics.eval_pickles_metrics()
 
 
 if __name__ == '__main__':

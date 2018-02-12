@@ -14,39 +14,51 @@ class Train(DataLoading):
     def __init__(self, config):
         super().__init__(config)
 
-        start_time = datetime.now()
-
-        self.network = YOLO(config)
-
-        self.load_data()
+        self.network = None
 
         self.results_file_name = config['network']['results_file']
 
         self.train_time = None
-        self.full_time = None
+        self.dataset_loading_time = None
+        self.metrics_evaluation_time = None
 
-        self.train()
+    def load_dataset(self):
+        start_time = datetime.now()
+
+        self.load_data()
 
         end_time = datetime.now()
-        self.full_time = end_time - start_time
 
-        self.summary()
+        self.dataset_loading_time = end_time - start_time
 
-    def train(self):
+    def train(self, config):
         start_time = datetime.now()
+
+        self.network = YOLO(config)
         self.network.train(self.train_data, self.train_labels,
                            self.validation_data, self.validation_labels)
+
         end_time = datetime.now()
         self.train_time = end_time - start_time
 
         self.network.save_model()
         self.network.save_json_model_structure()
 
+        start_time = datetime.now()
+
+        self.summary()
+
+        end_time = datetime.now()
+        self.metrics_evaluation_time = end_time - start_time
+
+        self.log()
+
     def summary(self):
         self.network.summary(self.train_data, self.train_labels,
                              self.validation_data, self.validation_labels,
                              self.test_data, self.test_labels)
 
+    def log(self):
         log_text = self.create_log_text()
 
         with open(self.results_file_name, 'a') as f:
@@ -152,12 +164,14 @@ _________________________________________________________________
         time_log = """
 _________________________________________________________________
 Time:
-    Train Time : {}
-    Full Time  : {}
+    Train Time              : {}
+    Dataset Loading Time    : {}
+    Metrics Evaluation Time : {}
 _________________________________________________________________
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """.format(self.train_time,
-           self.full_time)
+           self.dataset_loading_time,
+           self.metrics_evaluation_time)
 
         return time_log
 
