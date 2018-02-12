@@ -4,7 +4,8 @@ from keras.layers import Input, Conv2D, MaxPooling2D, Reshape,\
 from keras.models import load_model
 from keras.models import model_from_json
 from keras.callbacks import History
-from keras.optimizers import Adam
+from keras.optimizers import SGD, RMSprop, Adagrad, Adadelta, Adam, Adamax,\
+    Nadam
 from keras.initializers import RandomNormal
 import json
 import numpy as np
@@ -34,6 +35,8 @@ class YOLO:
         self.alpha_coord = config['network']['train']['loss']['alpha_coord']
         self.alpha_noobj = config['network']['train']['loss']['alpha_noobj']
 
+        self.optimizer_type =\
+            config['network']['train']['optimizer']['optimizer']
         self.learning_rate =\
             config['network']['train']['optimizer']['learning_rate']
         self.momentum = config['network']['train']['optimizer']['momentum']
@@ -242,8 +245,20 @@ class YOLO:
         return network
 
     def create_optimizer(self):
-        optimizer = Adam(lr=self.learning_rate,
-                         decay=self.decay)
+        if self.optimizer_type == 'SGD':
+            optimizer = SGD()
+        elif self.optimizer_type == 'RMSprop':
+            optimizer = RMSprop()
+        elif self.optimizer_type == 'Adagrad':
+            optimizer = Adagrad()
+        elif self.optimizer_type == 'Adadelta':
+            optimizer = Adadelta()
+        elif self.optimizer_type == 'Adam':
+            optimizer = Adam()
+        elif self.optimizer_type == 'Adamax':
+            optimizer = Adamax()
+        elif self.optimizer_type == 'Nadam':
+            optimizer = Nadam()
 
         return optimizer
 
@@ -391,9 +406,7 @@ class YOLO:
                                      custom_objects=custom_objects)
 
     def get_custom_objects(self):
-        custom_objects = {"precision": precision, "recall": recall,
-                          "fmeasure": fmeasure,
-                          "custom_loss": self.custom_loss}
+        custom_objects = {"custom_loss": self.custom_loss}
 
         return custom_objects
 
