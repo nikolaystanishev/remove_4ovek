@@ -35,12 +35,14 @@ class Predict(ImageProcessing):
 
         return predict
 
-    def predict_image(self, image_file):
+    def predict_all_boxes(self, image_file):
         image, _ = self.process_image(image_file)
 
-        predict = self.network.predict_boxes(image)
+        predict = self.network.predict(image)
 
         self.draw_rectangles(image[0], predict)
+
+        return predict
 
     def make_predictions_for_datasets(self):
         start_time = datetime.now()

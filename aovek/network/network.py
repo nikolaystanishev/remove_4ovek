@@ -336,6 +336,9 @@ class YOLO:
 
         predict = self.boxes_to_corners(predict)
 
+        predict = np.reshape(predict, (self.grid_size ** 2,
+                                       self.number_of_annotations + 1))
+
         return predict
 
     def predict_boxes(self, image):
@@ -360,8 +363,6 @@ class YOLO:
         return corners_prediction
 
     def non_max_suppression(self, predict):
-        predict = np.reshape(predict, (self.grid_size ** 2,
-                                       self.number_of_annotations + 1))
         predict = predict[predict[:, 4] > self.prob_threshold]
 
         probabilities = predict[:, 4]
