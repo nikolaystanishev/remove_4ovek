@@ -1,13 +1,10 @@
 from django.shortcuts import render
 
-import skvideo.io
-
 from .forms import VideoForm
 
+from aovek.video.video_processing import VideoProcessing
 
-def process_file(file_path):
-    video = skvideo.io.vread(file_path)
-    print(video.shape)
+video_processing = VideoProcessing()
 
 
 def upload_video(request):
@@ -17,7 +14,6 @@ def upload_video(request):
         form = VideoForm(request.POST, request.FILES)
         if form.is_valid():
             video = form.save()
-        process_file(video.video.path)
-        video.delete()
+        video_processing.process_video_file(video.video.path)
         form = VideoForm()
     return render(request, 'home.html', {'form': form})
