@@ -44,6 +44,11 @@ class Predict(ImageProcessing):
 
         return predict
 
+    def predict_video(self, video):
+        predictions = self.network.predict_video(video)
+
+        return predictions
+
     def make_predictions_for_datasets(self):
         start_time = datetime.now()
 

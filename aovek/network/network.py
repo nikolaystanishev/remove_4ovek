@@ -348,6 +348,25 @@ class YOLO:
 
         return true_boxes
 
+    def predict_video(self, video):
+        predictions = []
+
+        for frame in video:
+            processed_frame = np.expand_dims(frame, axis=0)
+
+            frame_predict = self.predict_boxes(processed_frame)
+
+            predictions.append(frame_predict)
+
+        predictions = sess.run(predictions)
+
+        max_pred = max(len(pred) for pred in predictions) + 1
+        predictions =\
+            np.array([np.vstack([pred, [[0] * 5] * (max_pred - len(pred))])
+                      for pred in predictions])
+
+        return predictions
+
     def boxes_to_corners(self, prediction):
         corners_prediction = np.array(prediction, copy=True)
 
@@ -375,10 +394,8 @@ class YOLO:
         true_boxes = tf.gather(boxes, true_boxes_idx)
         true_probabilities = tf.gather(probabilities, true_boxes_idx)
 
-        true_boxes = np.array(sess.run(true_boxes))
-        true_probabilities = np.array(sess.run(true_probabilities))
-
-        true_boxes = np.append(true_boxes, true_probabilities[:, None], axis=1)
+        true_boxes = tf.concat([true_boxes, true_probabilities[:, None]],
+                               axis=1)
 
         return true_boxes
 
