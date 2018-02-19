@@ -51,6 +51,7 @@ class Metrics:
 
         image = np.expand_dims(image, axis=0)
         pred = self.network.predict_boxes(image)
+        pred = self.network.sess_run(pred)
         pred[:, :4] = pred[:, :4] * self.image_size
 
         iou_image = self.get_iou_for_image(gt, pred)

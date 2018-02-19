@@ -30,6 +30,7 @@ class Predict(ImageProcessing):
         image, _ = self.process_image(image_file)
 
         predict = self.network.predict_boxes(image)
+        predict = self.network.sess_run(predict)
 
         self.draw_rectangles(image[0], predict)
 

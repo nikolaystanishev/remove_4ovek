@@ -399,6 +399,9 @@ class YOLO:
 
         return true_boxes
 
+    def sess_run(self, tensor):
+        return sess.run(tensor)
+
     def save_model(self):
         self.model.save(self.model_binary_data_file)
 
