@@ -5,6 +5,7 @@ from django.dispatch.dispatcher import receiver
 
 class Video(models.Model):
     video = models.FileField()
+    image = models.ImageField()
 
 
 @receiver(pre_delete, sender=Video)

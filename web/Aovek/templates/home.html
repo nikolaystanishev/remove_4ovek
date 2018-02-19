@@ -19,6 +19,12 @@
             <input class="btn btn-lg btn-primary btn-block" type="submit" value="Upload" />
         </form>
     </div>
+    <br>
+    {% if image %}
+        <div class="text-center">
+          <img src={{ image }} class="rounded">
+        </div>
+    {% endif %}
 </body>
 </html>
 
