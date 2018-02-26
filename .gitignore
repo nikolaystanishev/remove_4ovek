@@ -108,3 +108,4 @@ model/
 
 # database
 db.sqlite3
+web/media/
