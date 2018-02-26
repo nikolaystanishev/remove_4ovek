@@ -1,43 +1,43 @@
 {
     "dataset": {
         "url": "http://datasets.d2.mpi-inf.mpg.de/andriluka_cvpr10/cvpr10_multiview_pedestrians.tar.gz",
-        "path": "./dataset",
-        "folder": "./dataset/cvpr10_multiview_pedestrians",
+        "path": "./datasets",
+        "folder": "./datasets/cvpr10_multiview_pedestrians",
         "dataset_images": {
-            "train_folder": "./dataset/cvpr10_multiview_pedestrians/train",
-            "validation_folder": "./dataset/cvpr10_multiview_pedestrians/validate",
-            "test_folder": "./dataset/cvpr10_multiview_pedestrians/test"
+            "train_folder": "./datasets/cvpr10_multiview_pedestrians/train",
+            "validation_folder": "./datasets/cvpr10_multiview_pedestrians/validate",
+            "test_folder": "./datasets/cvpr10_multiview_pedestrians/test"
         },
         "dataset_annotations": {
             "train_annotations": [
-                "./dataset/cvpr10_multiview_pedestrians/viewpoints_train1.al",
-                "./dataset/cvpr10_multiview_pedestrians/viewpoints_train2.al",
-                "./dataset/cvpr10_multiview_pedestrians/viewpoints_train3.al",
-                "./dataset/cvpr10_multiview_pedestrians/viewpoints_train4.al",
-                "./dataset/cvpr10_multiview_pedestrians/viewpoints_train5.al",
-                "./dataset/cvpr10_multiview_pedestrians/viewpoints_train6.al",
-                "./dataset/cvpr10_multiview_pedestrians/viewpoints_train7.al",
-                "./dataset/cvpr10_multiview_pedestrians/viewpoints_train8.al"
+                "./datasets/cvpr10_multiview_pedestrians/viewpoints_train1.al",
+                "./datasets/cvpr10_multiview_pedestrians/viewpoints_train2.al",
+                "./datasets/cvpr10_multiview_pedestrians/viewpoints_train3.al",
+                "./datasets/cvpr10_multiview_pedestrians/viewpoints_train4.al",
+                "./datasets/cvpr10_multiview_pedestrians/viewpoints_train5.al",
+                "./datasets/cvpr10_multiview_pedestrians/viewpoints_train6.al",
+                "./datasets/cvpr10_multiview_pedestrians/viewpoints_train7.al",
+                "./datasets/cvpr10_multiview_pedestrians/viewpoints_train8.al"
             ],
             "validation_annotations": [
-                "./dataset/cvpr10_multiview_pedestrians/viewpoints_validate.al"
+                "./datasets/cvpr10_multiview_pedestrians/viewpoints_validate.al"
             ],
             "test_annotations": [
-                "./dataset/cvpr10_multiview_pedestrians/viewpoints_test.al"
+                "./datasets/cvpr10_multiview_pedestrians/viewpoints_test.al"
             ]
         },
         "pickle_name": {
-            "train": "./dataset/train_data.pickle",
-            "validation": "./dataset/validation_data.pickle",
-            "test": "./dataset/test_data.pickle"
+            "train": "./datasets/cvpr10_multiview_pedestrians/train_data.pickle",
+            "validation": "./datasets/cvpr10_multiview_pedestrians/validation_data.pickle",
+            "test": "./datasets/cvpr10_multiview_pedestrians/test_data.pickle"
         }
     },
 
     "image_info": {
         "image_size": 288,
         "pixel_depth": 255.0,
-        "color_channels": 3,
-        "color_mode": "RGB",
+        "color_channels": 1,
+        "color_mode": "L",
         "normalizer": "[0, 1]"
     },
 
@@ -47,19 +47,19 @@
     },
 
     "network": {
-        "model_binary_data_file": "./model.h5",
-        "results_file": "./results.txt",
-        "json_model_structure": "./model.json",
+        "model_binary_data_file": "./models/model.h5",
+        "results_file": "./results/results.txt",
+        "json_model_structure": "./models/model.json",
         "train": {
-            "batch_size": 32,
-            "number_of_epochs": 200,
+            "batch_size": 16,
+            "number_of_epochs": 10,
             "loss": {
                 "alpha_coord": 5,
                 "alpha_noobj": 0.5
             },
             "optimizer": {
                 "optimizer": "Adam",
-                "learning_rate": 0.0001,
+                "learning_rate": 0.001,
                 "momentum": 0.9,
                 "decay": 0.0005
             }
