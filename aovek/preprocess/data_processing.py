@@ -187,13 +187,13 @@ class DataProcessing(ImageProcessing):
             box, grid_x, grid_y =\
                 self.process_label_annotation(annotation, original_size)
 
-            if grid_x >= self.grid_size:
+            if grid_x > self.grid_size:
                 grid_x = self.grid_size - 1
-            if grid_y >= self.grid_size:
+            if grid_y > self.grid_size:
                 grid_y = self.grid_size - 1
 
-            label[grid_x, grid_y, 0:4] = box
-            label[grid_x, grid_y, 4] = 1
+            label[grid_x - 1, grid_y - 1, 0:4] = box
+            label[grid_x - 1, grid_y - 1, 4] = 1
 
         return np.array(label, ndmin=4)
 
