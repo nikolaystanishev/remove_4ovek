@@ -7,11 +7,17 @@ from aovek.training.train import Train
 from aovek.visualization.predict import Predict
 from aovek.validate.eval_metrics import EvalMetrics
 
-parser = argparse.ArgumentParser(description='4ovek')
+parser = argparse.ArgumentParser(description='''
+4ovek:
+    File for contolling people detection process
+''')
 parser._action_groups.pop()
 
 required = parser.add_argument_group('required arguments')
 optional = parser.add_argument_group('optional arguments')
+
+required.add_argument('-config_file', help='Path to config file.',
+                      required=True)
 
 optional.add_argument('-dataset_download', help='Download dataset.',
                       action='store_true')
@@ -23,9 +29,6 @@ optional.add_argument('-predict', help='Make predictions for entire dataset.',
                       action='store_true')
 optional.add_argument('-evaluate', help='Evaluate trained model.',
                       action='store_true')
-
-required.add_argument('-config_file', help='Path to config file.',
-                      required=True)
 
 
 def dataset_download(config):
