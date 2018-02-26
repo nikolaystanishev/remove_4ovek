@@ -15,7 +15,7 @@ class Metrics:
     def eval_metrics(self, images, labels):
         iou, gt_num, tp, fp, fn = self.get_metrics_params(images, labels)
 
-        iou, accuracy, precision, recall, f1_score =\
+        iou, precision, recall, f1_score =\
             self.calculate_metrics(iou, gt_num, tp, fp, fn)
 
         return {'iou': iou, 'precision': precision, 'recall': recall,
@@ -102,14 +102,12 @@ class Metrics:
     def calculate_metrics(self, iou, gt_num, tp, fp, fn):
         iou = self.save_div(iou, tp)
 
-        accuracy = self.save_div(tp, gt_num)
-
         precision = self.save_div(tp, (tp + fp))
         recall = self.save_div(tp, (tp + fn))
         f1_score = self.save_div((2 * precision * recall),
                                  (precision + recall))
 
-        return iou, accuracy, precision, recall, f1_score
+        return iou, precision, recall, f1_score
 
     def save_div(self, num1, num2):
         try:
