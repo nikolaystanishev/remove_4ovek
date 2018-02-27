@@ -42,6 +42,11 @@ class VideoToImage(VideoProcessing):
 
         self.write_video(video_with_rectangles, "video_with_rectangles.mp4")
 
+        for frame_num in range(video.shape[0]):
+            for pred in predictions[frame_num]:
+                video[frame_num][int(pred[1]) - 1:int(pred[3]) + 1,
+                                 int(pred[0]) - 1:int(pred[2]) + 1] = np.nan
+
         image = np.amax(video, axis=0)
 
         return image
