@@ -38,3 +38,6 @@ class VideoProcessing(ImageProcessing):
             resized_video = np.concatenate((resized_video, processed_frame))
 
         return resized_video
+
+    def write_video(self, video, path):
+        skvideo.io.vwrite(path, video)

@@ -46,6 +46,13 @@
         "number_of_annotations": 4
     },
 
+    "video_info": {
+        "up_offset": 0.6,
+        "down_offset": 1,
+        "left_offset": 1,
+        "right_offset": 1
+    },
+
     "network": {
         "model_binary_data_file": "./models/model.h5",
         "results_file": "./results/results.txt",
