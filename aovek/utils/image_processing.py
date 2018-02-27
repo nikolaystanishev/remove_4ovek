@@ -1,7 +1,6 @@
 from scipy import ndimage
 from skimage.transform import resize
 import numpy as np
-import skvideo.io
 
 
 class ImageProcessing:
@@ -35,35 +34,6 @@ class ImageProcessing:
         image = self.normalize_image(image)
 
         return (image, original_size)
-
-    def process_video(self, video_path):
-        video = skvideo.io.vread(video_path)
-
-        return video
-
-    def resize_video(self, video_path):
-        video = skvideo.io.vread(video_path, as_grey=True)
-
-        video = self.normalize_image(video)
-
-        resized_video =\
-            np.ndarray(shape=(0, self.image_size, self.image_size,
-                              self.color_channels), dtype=np.float32)
-
-        for frame in video:
-            frame_data = np.squeeze(frame, axis=2)
-
-            processed_frame =\
-                resize(frame_data,
-                       output_shape=(self.image_size, self.image_size),
-                       mode='constant')
-
-            processed_frame = np.expand_dims(processed_frame, axis=0)
-            processed_frame = np.expand_dims(processed_frame, axis=3)
-
-            resized_video = np.concatenate((resized_video, processed_frame))
-
-        return resized_video
 
     def normalize_image(self, image):
         if self.normalizer == '[0, 255]':

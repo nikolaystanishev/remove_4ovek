@@ -1,11 +1,11 @@
 from datetime import datetime
 import numpy as np
 
-from aovek.utils.image_processing import ImageProcessing
+from aovek.utils.video_processing import VideoProcessing
 from aovek.visualization.predict import Predict
 
 
-class VideoProcessing(ImageProcessing):
+class VideoToImage(VideoProcessing):
 
     def __init__(self, config):
         super().__init__(config)
