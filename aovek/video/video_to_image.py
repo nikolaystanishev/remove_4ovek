@@ -37,6 +37,33 @@ class VideoToImage(VideoProcessing):
         predictions[:, :, 2] *= original_size[1] * self.right_offset
         predictions[:, :, 3] *= original_size[0] * self.down_offset
 
+        video_with_rectangles =\
+            self.draw_rectangles_in_video(video, predictions)
+
+        self.write_video(video_with_rectangles, "video_with_rectangles.mp4")
+
         image = np.amax(video, axis=0)
 
         return image
+
+    def draw_rectangles_in_video(self, video, predictions):
+        rect_color = 0
+
+        video_with_rectangles = np.array(video, copy=True)
+
+        for frame in range(video.shape[0]):
+            for pred in predictions[frame]:
+                video_with_rectangles[frame][int(pred[1]):int(pred[3]),
+                                             int(pred[0]):
+                                             int(pred[0]) + 5] = rect_color
+                video_with_rectangles[frame][int(pred[1]):int(pred[3]),
+                                             int(pred[2]):
+                                             int(pred[2]) + 5] = rect_color
+                video_with_rectangles[frame][int(pred[1]):int(pred[1]) + 5,
+                                             int(pred[0]):
+                                             int(pred[2])] = rect_color
+                video_with_rectangles[frame][int(pred[3]):int(pred[3]) + 5,
+                                             int(pred[0]):
+                                             int(pred[2])] = rect_color
+
+        return video_with_rectangles
