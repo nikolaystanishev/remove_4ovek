@@ -67,7 +67,6 @@
             "optimizer": {
                 "optimizer": "Adam",
                 "learning_rate": 0.001,
-                "momentum": 0.9,
                 "decay": 0.0005
             }
         },

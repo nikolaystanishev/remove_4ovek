@@ -39,7 +39,6 @@ class YOLO:
             config['network']['train']['optimizer']['optimizer']
         self.learning_rate =\
             config['network']['train']['optimizer']['learning_rate']
-        self.momentum = config['network']['train']['optimizer']['momentum']
         self.decay = config['network']['train']['optimizer']['decay']
 
         self.optimizer = None
@@ -246,17 +245,17 @@ class YOLO:
 
     def create_optimizer(self):
         if self.optimizer_type == 'SGD':
-            optimizer = SGD()
+            optimizer = SGD(lr=self.learning_rate, decay=self.decay)
         elif self.optimizer_type == 'RMSprop':
-            optimizer = RMSprop()
+            optimizer = RMSprop(lr=self.learning_rate)
         elif self.optimizer_type == 'Adagrad':
             optimizer = Adagrad()
         elif self.optimizer_type == 'Adadelta':
             optimizer = Adadelta()
         elif self.optimizer_type == 'Adam':
-            optimizer = Adam()
+            optimizer = Adam(lr=self.learning_rate, decay=self.decay)
         elif self.optimizer_type == 'Adamax':
-            optimizer = Adamax()
+            optimizer = Adamax(lr=self.learning_rate, decay=self.decay)
         elif self.optimizer_type == 'Nadam':
             optimizer = Nadam()
 
