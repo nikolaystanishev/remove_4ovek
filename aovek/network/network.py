@@ -57,7 +57,7 @@ class YOLO:
         self.iou_threshold = config['network']['predict']['iou_threshold']
         self.prob_threshold = config['network']['predict']['prob_threshold']
 
-        self.model = self.create_model()
+        self.model = None
 
     def create_model(self):
         input = Input(shape=(self.image_size, self.image_size,
@@ -73,7 +73,8 @@ class YOLO:
                       loss=self.custom_loss)
 
         model.summary()
-        return model
+
+        self.model = model
 
     def create_network(self, input):
         network = Conv2D(filters=32,
