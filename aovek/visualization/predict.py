@@ -56,9 +56,6 @@ class Predict(ImageProcessing):
         self.make_predictions_for_dataset('Test', self.test_folder)
         self.make_predictions_for_dataset('Train', self.train_folder)
         self.make_predictions_for_dataset('Validation', self.validation_folder)
-        self.make_predictions_for_dataset('VOC', '../../../../Downloads/'
-                                                 'dataset/VOCdevkit/VOC2012/'
-                                                 'JPEGImages/')
 
         end_time = datetime.now()
         full_time = end_time - start_time
