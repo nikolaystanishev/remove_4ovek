@@ -25,6 +25,11 @@ class VideoToImage(VideoProcessing):
 
         predictions = self.predict.predict_video(resized_video)
 
+        original_size = list(video.shape)[1:-1]
+
+        predictions = self.predictions_to_original_size(predictions,
+                                                        original_size)
+
         self.make_video_with_rectangles(video, predictions, video_path)
 
         image = self.make_image(video, predictions)
@@ -32,13 +37,6 @@ class VideoToImage(VideoProcessing):
         return image
 
     def make_image(self, video, predictions):
-        original_size = list(video.shape)[1:-1]
-
-        predictions[:, :, 0] *= original_size[1] * self.left_offset
-        predictions[:, :, 1] *= original_size[0] * self.up_offset
-        predictions[:, :, 2] *= original_size[1] * self.right_offset
-        predictions[:, :, 3] *= original_size[0] * self.down_offset
-
         video_with_rectangles =\
             self.draw_rectangles_in_video(video, predictions)
 
@@ -52,6 +50,14 @@ class VideoToImage(VideoProcessing):
         image = np.amax(video, axis=0)
 
         return image
+
+    def predictions_to_original_size(self, predictions, original_size):
+        predictions[:, :, 0] *= original_size[1] * self.left_offset
+        predictions[:, :, 1] *= original_size[0] * self.up_offset
+        predictions[:, :, 2] *= original_size[1] * self.right_offset
+        predictions[:, :, 3] *= original_size[0] * self.down_offset
+
+        return predictions
 
     def make_video_with_rectangles(self, video, predictions, video_path):
         video_with_rectangles =\
