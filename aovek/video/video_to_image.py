@@ -25,6 +25,8 @@ class VideoToImage(VideoProcessing):
 
         predictions = self.predict.predict_video(resized_video)
 
+        self.make_video_with_rectangles(video, predictions, video_path)
+
         image = self.make_image(video, predictions)
 
         return image
@@ -50,6 +52,12 @@ class VideoToImage(VideoProcessing):
         image = np.amax(video, axis=0)
 
         return image
+
+    def make_video_with_rectangles(self, video, predictions, video_path):
+        video_with_rectangles =\
+            self.draw_rectangles_in_video(video, predictions)
+
+        self.write_video(video_with_rectangles, video_path.split('/')[-1])
 
     def draw_rectangles_in_video(self, video, predictions):
         rect_color = 0
