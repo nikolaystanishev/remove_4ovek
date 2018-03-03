@@ -37,19 +37,37 @@ class VideoToImage(VideoProcessing):
         return image
 
     def make_image(self, video, predictions):
-        video_with_rectangles =\
-            self.draw_rectangles_in_video(video, predictions)
+        image = np.zeros(video.shape[1:])
 
-        self.write_video(video_with_rectangles, "video_with_rectangles.mp4")
+        up_border = 0
+        down_border = image.shape[0]
+        left_border = 0
+        right_border = image.shape[1]
 
-        for frame_num in range(video.shape[0]):
-            for pred in predictions[frame_num]:
-                video[frame_num][int(pred[1]) - 1:int(pred[3]) + 1,
-                                 int(pred[0]) - 1:int(pred[2]) + 1] = np.nan
+        for frame, prediction in zip(video, predictions):
+            if np.sum(prediction[0:4]) == 0:
+                continue
+            for pred in prediction:
+                if np.sum(pred[0:4]) == 0:
+                    continue
+                image[up_border:int(pred[1])] = frame[up_border:int(pred[1])]
+                image[int(pred[3]):down_border] =\
+                    frame[int(pred[3]):down_border]
+                image[:, left_border:int(pred[0])] =\
+                    frame[:, left_border:int(pred[0])]
+                image[:, int(pred[2]):right_border] =\
+                    frame[:, int(pred[2]):right_border]
 
-        image = np.amax(video, axis=0)
+                if int(pred[1]) > up_border:
+                    up_border = int(pred[1])
+                if int(pred[3]) < down_border:
+                    down_border = int(pred[3])
+                if int(pred[0]) > left_border:
+                    left_border = int(pred[0])
+                if int(pred[2]) < right_border:
+                    right_border = int(pred[2])
 
-        return image
+        return image.astype('uint8')
 
     def predictions_to_original_size(self, predictions, original_size):
         predictions[:, :, 0] *= original_size[1] * self.left_offset
