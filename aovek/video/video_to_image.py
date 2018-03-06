@@ -50,20 +50,24 @@ class VideoToImage(VideoProcessing):
             for pred in prediction:
                 if np.sum(pred[0:4]) == 0:
                     continue
-                image[up_border:int(pred[1])] = frame[up_border:int(pred[1])]
-                image[int(pred[3]):down_border] =\
-                    frame[int(pred[3]):down_border]
-                image[:, left_border:int(pred[0])] =\
-                    frame[:, left_border:int(pred[0])]
-                image[:, int(pred[2]):right_border] =\
-                    frame[:, int(pred[2]):right_border]
 
+                image[up_border:int(pred[1]), left_border:right_border] =\
+                    frame[up_border:int(pred[1]), left_border:right_border]
                 if int(pred[1]) > up_border:
                     up_border = int(pred[1])
+
+                image[int(pred[3]):down_border, left_border:right_border] =\
+                    frame[int(pred[3]):down_border, left_border:right_border]
                 if int(pred[3]) < down_border:
                     down_border = int(pred[3])
+
+                image[up_border:down_border, left_border:int(pred[0])] =\
+                    frame[up_border:down_border, left_border:int(pred[0])]
                 if int(pred[0]) > left_border:
                     left_border = int(pred[0])
+
+                image[up_border:down_border, int(pred[2]):right_border] =\
+                    frame[up_border:down_border, int(pred[2]):right_border]
                 if int(pred[2]) < right_border:
                     right_border = int(pred[2])
 
