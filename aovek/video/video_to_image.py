@@ -30,8 +30,6 @@ class VideoToImage(VideoProcessing):
         predictions = self.predictions_to_original_size(predictions,
                                                         original_size)
 
-        self.make_video_with_rectangles(video, predictions, video_path)
-
         image = self.make_image(video, predictions)
 
         return image
