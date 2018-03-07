@@ -35,6 +35,13 @@ class ImageProcessing:
 
         return (image, original_size)
 
+    def load_image(self, image_file):
+        image = ndimage.imread(image_file, mode='RGB').astype(float)
+
+        image = self.normalize_image(image)
+
+        return image
+
     def normalize_image(self, image):
         if self.normalizer == '[0, 255]':
             image = self.normalize_image_without_normalization(image)
