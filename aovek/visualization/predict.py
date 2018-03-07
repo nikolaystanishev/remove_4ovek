@@ -27,21 +27,23 @@ class Predict(ImageProcessing):
         self.test_folder = config['dataset']['dataset_images']['test_folder']
 
     def predict(self, image_file):
-        image, _ = self.process_image(image_file)
+        image, original_size = self.process_image(image_file)
+        original_image = self.load_image(image_file)
 
         predict = self.network.predict_boxes(image)
         predict = self.network.sess_run(predict)
 
-        self.draw_rectangles(image[0], predict)
+        self.draw_rectangles(original_image, original_size, predict)
 
         return predict
 
     def predict_all_boxes(self, image_file):
-        image, _ = self.process_image(image_file)
+        image, original_size = self.process_image(image_file)
+        original_image = self.load_image(image_file)
 
         predict = self.network.predict(image)
 
-        self.draw_rectangles(image[0], predict)
+        self.draw_rectangles(original_image, original_size, predict)
 
         return predict
 
@@ -53,9 +55,9 @@ class Predict(ImageProcessing):
     def make_predictions_for_datasets(self):
         start_time = datetime.now()
 
-        self.make_predictions_for_dataset('Test', self.test_folder)
         self.make_predictions_for_dataset('Train', self.train_folder)
         self.make_predictions_for_dataset('Validation', self.validation_folder)
+        self.make_predictions_for_dataset('Test', self.test_folder)
 
         end_time = datetime.now()
         full_time = end_time - start_time
@@ -89,7 +91,7 @@ class Predict(ImageProcessing):
                     if np.sum(el) != 0:
                             print(el)
 
-    def draw_rectangles(self, image, lables):
+    def draw_rectangles(self, image, original_size, lables):
         fig, ax = plt.subplots(1)
 
         ax.imshow(np.squeeze(image))
@@ -97,10 +99,10 @@ class Predict(ImageProcessing):
         for label in lables:
             print(label[4])
 
-            x = label[0] * self.image_size
-            y = label[1] * self.image_size
-            w = (label[2] - label[0]) * self.image_size
-            h = (label[3] - label[1]) * self.image_size
+            x = label[0] * original_size[0]
+            y = label[1] * original_size[1]
+            w = (label[2] - label[0]) * original_size[0]
+            h = (label[3] - label[1]) * original_size[1]
 
             rect = Rectangle((x, y), w, h, linewidth=1,
                              edgecolor='r', facecolor='none')
