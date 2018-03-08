@@ -47,7 +47,7 @@
     },
 
     "video_info": {
-        "up_offset": 0.6,
+        "up_offset": 1,
         "down_offset": 1,
         "left_offset": 1,
         "right_offset": 1
@@ -59,7 +59,7 @@
         "json_model_structure": "./models/model.json",
         "train": {
             "batch_size": 16,
-            "number_of_epochs": 10,
+            "number_of_epochs": 30,
             "loss": {
                 "alpha_coord": 5,
                 "alpha_noobj": 0.5
