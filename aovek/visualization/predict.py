@@ -43,7 +43,8 @@ class Predict(ImageProcessing):
 
         predict = self.network.predict(image)
 
-        self.draw_rectangles(original_image, original_size, predict)
+        self.draw_rectangles(original_image, original_size,
+                             predict, all_boxes=True)
 
         return predict
 
@@ -91,13 +92,14 @@ class Predict(ImageProcessing):
                     if np.sum(el) != 0:
                             print(el)
 
-    def draw_rectangles(self, image, original_size, lables):
+    def draw_rectangles(self, image, original_size, lables, all_boxes=False):
         fig, ax = plt.subplots(1)
 
         ax.imshow(np.squeeze(image))
 
         for label in lables:
-            print(label[4])
+            if all_boxes is False:
+                print(label[4])
 
             x = label[0] * original_size[0]
             y = label[1] * original_size[1]
