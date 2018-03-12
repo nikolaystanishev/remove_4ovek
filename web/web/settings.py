@@ -127,4 +127,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 PROJECT_ROOT = os.path.dirname(__file__)
 sys.path.insert(0, os.path.join(PROJECT_ROOT, "../../"))
 
-CONFIG_FILE = './config.json'
+CONFIG_FILE = PROJECT_ROOT + '/../../config.json'
