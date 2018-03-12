@@ -26,7 +26,7 @@ SECRET_KEY = '8#p-cv-n%@ss_grg4v-_&ymc0n9%)bu_2_d8n@qg2s(%l(vkq@'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['35.204.166.119', 'aovek.ml', 'www.aovek.ml']
 
 
 # Application definition
@@ -75,11 +75,16 @@ WSGI_APPLICATION = 'web.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+  'default': {
+      'ENGINE': 'django.db.backends.postgresql_psycopg2',
+      'NAME': '*****',
+      'HOST': '*****',
+      'PORT': '*****',
+      'USER': '*****',
+      'PASSWORD': '*****'
+  }
 }
 
 
