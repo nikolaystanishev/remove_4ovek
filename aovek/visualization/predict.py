@@ -3,8 +3,8 @@ import json
 import os
 import imghdr
 from datetime import datetime
-import matplotlib.pyplot as plt
-from matplotlib.patches import Rectangle
+# import matplotlib.pyplot as plt
+# from matplotlib.patches import Rectangle
 from prettytable import PrettyTable
 
 from aovek.network.network import YOLO
