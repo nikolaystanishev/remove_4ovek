@@ -11,6 +11,10 @@ from io import BytesIO
 graph = tf.get_default_graph()
 
 
+def home(request):
+    return render(request, 'base.html')
+
+
 def upload_video(request):
     if request.method == 'GET':
         form = VideoForm()
