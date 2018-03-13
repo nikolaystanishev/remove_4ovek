@@ -15,6 +15,10 @@ def home(request):
     return render(request, 'base.html')
 
 
+def about(request):
+    return render(request, 'about.html')
+
+
 def make_photo(request):
     if request.method == 'GET':
         form = VideoForm()
