@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block make_photo %}
+  <div class="container">
+    <form class="form-signin" method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div><br></div>
+      <div class="custom-file">
+        {{ form }}
+        <label class="custom-file-label" for="customFile">Choose Video</label>
+      </div>
+      <div><br></div>
+      <input class="btn btn-lg btn-secondary btn-block" type="submit" value="Upload" />
+    </form>
+  </div>
+  <br>
+  {% if image %}
+    <div class="text-center">
+      <img src={{ image }} class="rounded">
+    </div>
+  {% endif %}
+{% endblock make_photo %}

@@ -15,7 +15,7 @@ def home(request):
     return render(request, 'base.html')
 
 
-def upload_video(request):
+def make_photo(request):
     if request.method == 'GET':
         form = VideoForm()
         objects = {'form': form, 'image': None}
@@ -39,4 +39,4 @@ def upload_video(request):
         form = VideoForm()
         objects = {'form': form, 'image': video.image.url}
 
-    return render(request, 'home.html', objects)
+    return render(request, 'make_photo.html', objects)

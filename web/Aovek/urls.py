@@ -7,4 +7,5 @@ from Aovek import views
 
 urlpatterns = [
     url(r'^$', views.home),
+    url(r'^make_photo$', views.make_photo),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
