@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block make_photo %}
+  <div class="container">
+    <form class="form-signin" method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div><br></div>
+      <div class="custom-file">
+        {{ form }}
+        <label class="custom-file-label" for="customFile">Choose Video</label>
+      </div>
+      <div><br></div>
+      <input class="btn btn-lg btn-secondary btn-block" type="submit" value="Upload" />
+    </form>
+  </div>
+  <br>
+  {% if image %}
+    <div class="text-center">
+      <div clas="col-md-12 mb-4">
+        <a href={{ image }} download="image_without_people">
+          <button type="button" class="btn btn-info">
+            Download Photo
+          </button>
+        </a>
+        <a target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=aovek.ml{{image}}" class="fb-xfbml-parse-ignore">
+          <button type="button" class="btn btn-fb btn-fb waves-effect waves-light" style="background-color: #3b5998;">
+            <i class="fa fa-facebook left"></i>
+            Facebook Share
+          </button>
+        </a>
+      </div>
+      <img src={{ image }} class="rounded">
+    </div>
+  {% endif %}
+{% endblock make_photo %}

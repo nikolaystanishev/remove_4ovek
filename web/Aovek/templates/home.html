@@ -1,31 +1,5 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Aovek</title>
+{% extends "base.html" %}
 
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
-</head>
-<body>
-    <div class="container">
-        <form class="form-signin" method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div><br></div>
-            <div class="custom-file">
-                {{ form }}
-                <label class="custom-file-label" for="customFile">Choose Video</label>
-            </div>
-            <div><br></div>
-            <input class="btn btn-lg btn-primary btn-block" type="submit" value="Upload" />
-        </form>
-    </div>
-    <br>
-    {% if image %}
-        <div class="text-center">
-          <img src={{ image }} class="rounded">
-        </div>
-    {% endif %}
-</body>
-</html>
-
-
+{% block home %}
+    <h1 style="position: fixed; top: 50%; left: 25%;">Aovek is system for making photos without people from static video.</h1>
+{% endblock home %}

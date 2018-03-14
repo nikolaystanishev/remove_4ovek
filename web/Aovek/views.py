@@ -11,7 +11,15 @@ from io import BytesIO
 graph = tf.get_default_graph()
 
 
-def upload_video(request):
+def home(request):
+    return render(request, 'home.html')
+
+
+def about(request):
+    return render(request, 'about.html')
+
+
+def make_photo(request):
     if request.method == 'GET':
         form = VideoForm()
         objects = {'form': form, 'image': None}
@@ -35,4 +43,4 @@ def upload_video(request):
         form = VideoForm()
         objects = {'form': form, 'image': video.image.url}
 
-    return render(request, 'home.html', objects)
+    return render(request, 'make_photo.html', objects)
