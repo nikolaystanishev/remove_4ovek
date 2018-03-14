@@ -16,6 +16,19 @@
   <br>
   {% if image %}
     <div class="text-center">
+      <div clas="col-md-12 mb-4">
+        <a href={{ image }} download="image_without_people">
+          <button type="button" class="btn btn-info">
+            Download Photo
+          </button>
+        </a>
+        <a target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=aovek.ml{{image}}" class="fb-xfbml-parse-ignore">
+          <button type="button" class="btn btn-fb btn-fb waves-effect waves-light" style="background-color: #3b5998;">
+            <i class="fa fa-facebook left"></i>
+            Facebook Share
+          </button>
+        </a>
+      </div>
       <img src={{ image }} class="rounded">
     </div>
   {% endif %}
