@@ -49,7 +49,7 @@ class Predict(ImageProcessing):
         return predict
 
     def predict_video(self, video):
-        predictions = self.network.predict_video(video)
+        predictions = self.network.predict_images(video)
 
         return predictions
 

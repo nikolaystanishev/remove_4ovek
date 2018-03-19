@@ -348,7 +348,7 @@ class YOLO:
 
         return true_boxes
 
-    def predict_video(self, video):
+    def predict_images(self, video):
         predictions = []
 
         for frame in video:
