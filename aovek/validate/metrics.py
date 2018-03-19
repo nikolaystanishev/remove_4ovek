@@ -29,9 +29,14 @@ class Metrics:
         fp = 0
         fn = 0
 
-        for image, label in zip(images, labels):
+        preds = self.network.predict_images(images)
+        preds[:, :, :4] = preds[:, :, :4] * self.image_size
+
+        for image, label, pred in zip(images, labels, preds):
+            pred = pred[~np.all(pred == 0, axis=1)]
+
             iou_image, gt_num_image, tp_image, fp_image, fn_image =\
-                self.get_one_image_metrics_params(image, label)
+                self.get_one_image_metrics_params(image, label, pred)
 
             iou += iou_image
             gt_num += gt_num_image
@@ -42,7 +47,7 @@ class Metrics:
 
         return iou, gt_num, tp, fp, fn
 
-    def get_one_image_metrics_params(self, image, label):
+    def get_one_image_metrics_params(self, image, label, pred):
         label = np.reshape(label, (self.grid_size ** 2,
                                    (self.number_of_annotations + 1)))
 
@@ -50,9 +55,6 @@ class Metrics:
         gt = self.get_corners_from_labels(gt)
 
         image = np.expand_dims(image, axis=0)
-        pred = self.network.predict_boxes(image)
-        pred = self.network.sess_run(pred)
-        pred[:, :4] = pred[:, :4] * self.image_size
 
         iou_image = self.get_iou_for_image(gt, pred)
 
