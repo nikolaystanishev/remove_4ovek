@@ -1,3 +1,5 @@
+import tensorflow as tf
+from keras import backend as K
 from keras.models import Model
 from keras.layers import Input, Conv2D, MaxPooling2D, Reshape,\
     BatchNormalization, LeakyReLU
@@ -12,8 +14,8 @@ import numpy as np
 
 from aovek.validate.model_metrics import ModelMetrics
 
-import tensorflow as tf
 sess = tf.Session()
+K.set_session(sess)
 
 
 class YOLO:
