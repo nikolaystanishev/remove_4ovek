@@ -13,7 +13,9 @@ class Metrics:
             config['label_info']['number_of_annotations']
 
     def eval_metrics(self, images, labels):
-        iou, gt_num, tp, fp, fn = self.get_metrics_params(images, labels)
+        labels, preds = self.process_pred_labels(images, labels)
+
+        iou, gt_num, tp, fp, fn = self.get_metrics_params(labels, preds)
 
         iou, precision, recall, f1_score =\
             self.calculate_metrics(iou, gt_num, tp, fp, fn)
@@ -21,7 +23,17 @@ class Metrics:
         return {'iou': iou, 'precision': precision, 'recall': recall,
                 'f1_score': f1_score}
 
-    def get_metrics_params(self, images, labels):
+    def process_pred_labels(self, images, labels):
+        labels = np.reshape(labels, (-1, self.grid_size ** 2,
+                                     (self.number_of_annotations + 1)))
+        labels = self.get_corners_from_labels(labels)
+
+        preds = self.network.predict_images(images)
+        preds[:, :, :4] = preds[:, :, :4] * self.image_size
+
+        return labels, preds
+
+    def get_metrics_params(self, labels, preds):
         iou = 0
         gt_num = 0
 
@@ -29,14 +41,11 @@ class Metrics:
         fp = 0
         fn = 0
 
-        preds = self.network.predict_images(images)
-        preds[:, :, :4] = preds[:, :, :4] * self.image_size
-
-        for image, label, pred in zip(images, labels, preds):
+        for label, pred in zip(labels, preds):
             pred = pred[~np.all(pred == 0, axis=1)]
 
             iou_image, gt_num_image, tp_image, fp_image, fn_image =\
-                self.get_one_image_metrics_params(image, label, pred)
+                self.get_one_image_metrics_params(label, pred)
 
             iou += iou_image
             gt_num += gt_num_image
@@ -47,14 +56,8 @@ class Metrics:
 
         return iou, gt_num, tp, fp, fn
 
-    def get_one_image_metrics_params(self, image, label, pred):
-        label = np.reshape(label, (self.grid_size ** 2,
-                                   (self.number_of_annotations + 1)))
-
+    def get_one_image_metrics_params(self, label, pred):
         gt = label[np.where(label[:, 4] == 1)]
-        gt = self.get_corners_from_labels(gt)
-
-        image = np.expand_dims(image, axis=0)
 
         iou_image = self.get_iou_for_image(gt, pred)
 
@@ -122,14 +125,16 @@ class Metrics:
     def get_corners_from_labels(self, labels):
         corners = np.array(labels, copy=True)
 
-        corners[:, 0] =\
-            (labels[:, 0] - (labels[:, 2] / 2)) * self.image_size
-        corners[:, 1] =\
-            (labels[:, 1] - (labels[:, 3] / 2)) * self.image_size
-        corners[:, 2] =\
-            (labels[:, 0] + (labels[:, 2] / 2)) * self.image_size
-        corners[:, 3] =\
-            (labels[:, 1] + (labels[:, 3] / 2)) * self.image_size
+        corners[:, :, 0] =\
+            (labels[:, :, 0] - (labels[:, :, 2] / 2))
+        corners[:, :, 1] =\
+            (labels[:, :, 1] - (labels[:, :, 3] / 2))
+        corners[:, :, 2] =\
+            (labels[:, :, 0] + (labels[:, :, 2] / 2))
+        corners[:, :, 3] =\
+            (labels[:, :, 1] + (labels[:, :, 3] / 2))
+
+        corners[:, :, :4] = corners[:, :, :4] * self.image_size
 
         return corners
 
