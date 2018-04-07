@@ -115,8 +115,6 @@ class Metrics:
         return iou, precision, recall, f1_score
 
     def save_div(self, num1, num2):
-        if num1 == 0:
-            return np.nan
         try:
             return num1 / num2
         except ZeroDivisionError:
