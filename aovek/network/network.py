@@ -327,9 +327,6 @@ class YOLO:
 
         predict = self.boxes_to_corners(predict)
 
-        predict = np.reshape(predict, (self.grid_size ** 2,
-                                       self.number_of_annotations + 1))
-
         return predict
 
     def predict_boxes(self, image):
@@ -340,14 +337,14 @@ class YOLO:
         return true_boxes
 
     def predict_images(self, video):
+        video_predictions = self.predict(video)
+
         predictions = []
 
-        for frame in video:
-            processed_frame = np.expand_dims(frame, axis=0)
+        for pred in video_predictions:
+            true_boxes = self.non_max_suppression(pred)
 
-            frame_predict = self.predict_boxes(processed_frame)
-
-            predictions.append(frame_predict)
+            predictions.append(true_boxes)
 
         predictions = sess.run(predictions)
 
@@ -361,14 +358,18 @@ class YOLO:
     def boxes_to_corners(self, prediction):
         corners_prediction = np.array(prediction, copy=True)
 
-        corners_prediction[:, :, :, 0] =\
-            prediction[:, :, :, 0] - (prediction[:, :, :, 2] / 2)
-        corners_prediction[:, :, :, 1] =\
-            prediction[:, :, :, 1] - (prediction[:, :, :, 3] / 2)
-        corners_prediction[:, :, :, 2] =\
-            prediction[:, :, :, 0] + (prediction[:, :, :, 2] / 2)
-        corners_prediction[:, :, :, 3] =\
-            prediction[:, :, :, 1] + (prediction[:, :, :, 3] / 2)
+        corners_prediction = np.reshape(corners_prediction,
+                                        (-1, self.grid_size ** 2,
+                                         self.number_of_annotations + 1))
+
+        corners_prediction[:, :, 0] =\
+            prediction[:, :, 0] - (prediction[:, :, 2] / 2)
+        corners_prediction[:, :, 1] =\
+            prediction[:, :, 1] - (prediction[:, :, 3] / 2)
+        corners_prediction[:, :, 2] =\
+            prediction[:, :, 0] + (prediction[:, :, 2] / 2)
+        corners_prediction[:, :, 3] =\
+            prediction[:, :, 1] + (prediction[:, :, 3] / 2)
 
         return corners_prediction
 
