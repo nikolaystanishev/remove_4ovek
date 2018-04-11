@@ -356,11 +356,10 @@ class YOLO:
         return predictions
 
     def boxes_to_corners(self, prediction):
-        corners_prediction = np.array(prediction, copy=True)
+        prediction = np.reshape(prediction, (-1, self.grid_size ** 2,
+                                             self.number_of_annotations + 1))
 
-        corners_prediction = np.reshape(corners_prediction,
-                                        (-1, self.grid_size ** 2,
-                                         self.number_of_annotations + 1))
+        corners_prediction = np.array(prediction, copy=True)
 
         corners_prediction[:, :, 0] =\
             prediction[:, :, 0] - (prediction[:, :, 2] / 2)
