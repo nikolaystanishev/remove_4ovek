@@ -22,11 +22,11 @@ class Predict(ImageProcessing):
         self.grid_size = config['label_info']['grid_size']
 
         self.train_folder =\
-            config['dataset']['cvpr10']['dataset_images']['train_folder']
+            config['dataset']['cvpt10']['dataset_images']['train_folder']
         self.validation_folder =\
-            config['dataset']['cvpr10']['dataset_images']['validation_folder']
+            config['dataset']['cvpt10']['dataset_images']['validation_folder']
         self.test_folder =\
-            config['dataset']['cvpr10']['dataset_images']['test_folder']
+            config['dataset']['cvpt10']['dataset_images']['test_folder']
         self.voc_folder = config['dataset']['voc']["folder"]
 
     def predict(self, image_file):
