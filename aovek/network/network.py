@@ -1,3 +1,5 @@
+import tensorflow as tf
+from keras import backend as K
 from keras.models import Model
 from keras.layers import Input, Conv2D, MaxPooling2D, Reshape,\
     BatchNormalization, LeakyReLU
@@ -12,8 +14,8 @@ import numpy as np
 
 from aovek.validate.model_metrics import ModelMetrics
 
-import tensorflow as tf
 sess = tf.Session()
+K.set_session(sess)
 
 
 class YOLO:
@@ -248,7 +250,7 @@ class YOLO:
         if self.optimizer_type == 'SGD':
             optimizer = SGD(lr=self.learning_rate, decay=self.decay)
         elif self.optimizer_type == 'RMSprop':
-            optimizer = RMSprop(lr=self.learning_rate)
+            optimizer = RMSprop(lr=self.learning_rate, decay=self.decay)
         elif self.optimizer_type == 'Adagrad':
             optimizer = Adagrad()
         elif self.optimizer_type == 'Adadelta':
@@ -275,7 +277,7 @@ class YOLO:
                        callbacks=[self.history, self.metrics])
 
     def custom_loss(self, true, pred):
-        loss = 0
+        loss = tf.Variable(0, dtype=tf.float32)
 
         true =\
             tf.reshape(true, shape=(-1, self.grid_size ** 2,
@@ -299,35 +301,24 @@ class YOLO:
         p_true = true[:, :, 4]
         p_pred = pred[:, :, 4]
 
-        loss +=\
-            np.sum(
-                tf.scalar_mul(
-                    self.alpha_coord,
-                    tf.multiply(
-                        p_true,
-                        tf.add(tf.squared_difference(x_true, x_pred),
-                               tf.squared_difference(y_true, y_pred)))))
+        loss = tf.add(loss, tf.reduce_sum(
+            tf.scalar_mul(self.alpha_coord, tf.multiply(
+                p_true, tf.add(tf.squared_difference(x_true, x_pred),
+                               tf.squared_difference(y_true, y_pred))))))
 
-        loss +=\
-            np.sum(
-                tf.scalar_mul(
-                    self.alpha_coord,
-                    tf.multiply(
-                        p_true,
-                        tf.add(tf.squared_difference(tf.sqrt(w_true),
+        loss = tf.add(loss, tf.reduce_sum(
+            tf.scalar_mul(self.alpha_coord, tf.multiply(
+                p_true, tf.add(tf.squared_difference(tf.sqrt(w_true),
                                                      tf.sqrt(w_pred)),
                                tf.squared_difference(tf.sqrt(h_true),
-                                                     tf.sqrt(h_pred))))))
+                                                     tf.sqrt(h_pred)))))))
 
-        loss += np.sum(tf.multiply(p_true,
-                                   tf.squared_difference(p_true, p_pred)))
+        loss = tf.add(loss, tf.reduce_sum(tf.multiply(
+            p_true, tf.squared_difference(p_true, p_pred))))
 
-        loss +=\
-            np.sum(
-                tf.scalar_mul(
-                    self.alpha_noobj,
-                    tf.multiply((1 - p_true),
-                                tf.squared_difference(p_true, p_pred))))
+        loss = tf.add(loss, tf.reduce_sum(tf.scalar_mul(
+            self.alpha_noobj, tf.multiply(
+                (1 - p_true), tf.squared_difference(p_true, p_pred)))))
 
         return loss
 
@@ -335,9 +326,6 @@ class YOLO:
         predict = self.model.predict(image)
 
         predict = self.boxes_to_corners(predict)
-
-        predict = np.reshape(predict, (self.grid_size ** 2,
-                                       self.number_of_annotations + 1))
 
         return predict
 
@@ -348,15 +336,15 @@ class YOLO:
 
         return true_boxes
 
-    def predict_video(self, video):
+    def predict_images(self, video):
+        video_predictions = self.predict(video)
+
         predictions = []
 
-        for frame in video:
-            processed_frame = np.expand_dims(frame, axis=0)
+        for pred in video_predictions:
+            true_boxes = self.non_max_suppression(pred)
 
-            frame_predict = self.predict_boxes(processed_frame)
-
-            predictions.append(frame_predict)
+            predictions.append(true_boxes)
 
         predictions = sess.run(predictions)
 
@@ -368,16 +356,19 @@ class YOLO:
         return predictions
 
     def boxes_to_corners(self, prediction):
+        prediction = np.reshape(prediction, (-1, self.grid_size ** 2,
+                                             self.number_of_annotations + 1))
+
         corners_prediction = np.array(prediction, copy=True)
 
-        corners_prediction[:, :, :, 0] =\
-            prediction[:, :, :, 0] - (prediction[:, :, :, 2] / 2)
-        corners_prediction[:, :, :, 1] =\
-            prediction[:, :, :, 1] - (prediction[:, :, :, 3] / 2)
-        corners_prediction[:, :, :, 2] =\
-            prediction[:, :, :, 0] + (prediction[:, :, :, 2] / 2)
-        corners_prediction[:, :, :, 3] =\
-            prediction[:, :, :, 1] + (prediction[:, :, :, 3] / 2)
+        corners_prediction[:, :, 0] =\
+            prediction[:, :, 0] - (prediction[:, :, 2] / 2)
+        corners_prediction[:, :, 1] =\
+            prediction[:, :, 1] - (prediction[:, :, 3] / 2)
+        corners_prediction[:, :, 2] =\
+            prediction[:, :, 0] + (prediction[:, :, 2] / 2)
+        corners_prediction[:, :, 3] =\
+            prediction[:, :, 1] + (prediction[:, :, 3] / 2)
 
         return corners_prediction
 

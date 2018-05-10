@@ -21,10 +21,13 @@ class Predict(ImageProcessing):
 
         self.grid_size = config['label_info']['grid_size']
 
-        self.train_folder = config['dataset']['dataset_images']['train_folder']
+        self.train_folder =\
+            config['dataset']['cvpr10']['dataset_images']['train_folder']
         self.validation_folder =\
-            config['dataset']['dataset_images']['validation_folder']
-        self.test_folder = config['dataset']['dataset_images']['test_folder']
+            config['dataset']['cvpr10']['dataset_images']['validation_folder']
+        self.test_folder =\
+            config['dataset']['cvpr10']['dataset_images']['test_folder']
+        self.voc_folder = config['dataset']['voc']["folder"]
 
     def predict(self, image_file):
         image, original_size = self.process_image(image_file)
@@ -49,7 +52,7 @@ class Predict(ImageProcessing):
         return predict
 
     def predict_video(self, video):
-        predictions = self.network.predict_video(video)
+        predictions = self.network.predict_images(video)
 
         return predictions
 
@@ -59,6 +62,7 @@ class Predict(ImageProcessing):
         self.make_predictions_for_dataset('Train', self.train_folder)
         self.make_predictions_for_dataset('Validation', self.validation_folder)
         self.make_predictions_for_dataset('Test', self.test_folder)
+        self.make_predictions_for_dataset('VOC', self.voc_folder)
 
         end_time = datetime.now()
         full_time = end_time - start_time

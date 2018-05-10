@@ -22,6 +22,8 @@ class Train(DataLoading):
         self.dataset_loading_time = None
         self.metrics_evaluation_time = None
 
+        self.start_model = config['network']['train']['start_model']
+
     def load_dataset(self):
         start_time = datetime.now()
 
@@ -36,6 +38,10 @@ class Train(DataLoading):
 
         self.network = YOLO(config)
         self.network.create_model()
+
+        if self.start_model:
+            self.network.load_model_file(self.start_model)
+
         self.network.train(self.train_data, self.train_labels,
                            self.validation_data, self.validation_labels)
 

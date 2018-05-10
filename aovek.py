@@ -2,7 +2,8 @@ import argparse
 import json
 
 from aovek.preprocess.download_dataset import download_dataset
-from aovek.preprocess.data_processing import DataProcessing
+from aovek.preprocess.cvpr10_processing import CVPR10Processing
+from aovek.preprocess.voc_processing import VOCProcessing
 from aovek.training.train import Train
 from aovek.visualization.predict import Predict
 from aovek.validate.eval_metrics import EvalMetrics
@@ -36,7 +37,11 @@ def dataset_download(config):
 
 
 def processes_dataset(config):
-    dp = DataProcessing(config)
+    if 'cvpr10' in config['dataset']['dataset']:
+        dp = CVPR10Processing(config)
+    elif 'voc' in config['dataset']['dataset']:
+        dp = VOCProcessing(config)
+
     dp.pickle_dataset()
 
     print('Taken time: {}'.format(str(dp.get_time())))
