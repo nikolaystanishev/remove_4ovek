@@ -1,6 +1,6 @@
 {
     "dataset": {
-        "dataset": "voc",
+        "dataset": ["cvpt10", "voc"],
         "cvpt10": {
             "url": "http://datasets.d2.mpi-inf.mpg.de/andriluka_cvpr10/cvpr10_multiview_pedestrians.tar.gz",
             "path": "./datasets",

@@ -37,9 +37,9 @@ def dataset_download(config):
 
 
 def processes_dataset(config):
-    if config['dataset']['dataset'] == 'cvpr10':
+    if 'cvpr10' in config['dataset']['dataset']:
         dp = CVPR10Processing(config)
-    elif config['dataset']['dataset'] == 'voc':
+    elif 'voc' in config['dataset']['dataset']:
         dp = VOCProcessing(config)
 
     dp.pickle_dataset()
