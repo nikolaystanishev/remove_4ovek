@@ -250,7 +250,7 @@ class YOLO:
         if self.optimizer_type == 'SGD':
             optimizer = SGD(lr=self.learning_rate, decay=self.decay)
         elif self.optimizer_type == 'RMSprop':
-            optimizer = RMSprop(lr=self.learning_rate)
+            optimizer = RMSprop(lr=self.learning_rate, decay=self.decay)
         elif self.optimizer_type == 'Adagrad':
             optimizer = Adagrad()
         elif self.optimizer_type == 'Adadelta':
