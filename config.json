@@ -1,35 +1,64 @@
 {
     "dataset": {
-        "url": "http://datasets.d2.mpi-inf.mpg.de/andriluka_cvpr10/cvpr10_multiview_pedestrians.tar.gz",
-        "path": "./datasets",
-        "folder": "./datasets/cvpr10_multiview_pedestrians",
-        "dataset_images": {
-            "train_folder": "./datasets/cvpr10_multiview_pedestrians/train",
-            "validation_folder": "./datasets/cvpr10_multiview_pedestrians/validate",
-            "test_folder": "./datasets/cvpr10_multiview_pedestrians/test"
+        "dataset": "voc",
+        "cvpt10": {
+            "url": "http://datasets.d2.mpi-inf.mpg.de/andriluka_cvpr10/cvpr10_multiview_pedestrians.tar.gz",
+            "path": "./datasets",
+            "folder": "./datasets/cvpr10_multiview_pedestrians",
+            "dataset_images": {
+                "train_folder": "./datasets/cvpr10_multiview_pedestrians/train",
+                "validation_folder": "./datasets/cvpr10_multiview_pedestrians/validate",
+                "test_folder": "./datasets/cvpr10_multiview_pedestrians/test"
+            },
+            "dataset_annotations": {
+                "train_annotations": [
+                    "./datasets/cvpr10_multiview_pedestrians/viewpoints_train1.al",
+                    "./datasets/cvpr10_multiview_pedestrians/viewpoints_train2.al",
+                    "./datasets/cvpr10_multiview_pedestrians/viewpoints_train3.al",
+                    "./datasets/cvpr10_multiview_pedestrians/viewpoints_train4.al",
+                    "./datasets/cvpr10_multiview_pedestrians/viewpoints_train5.al",
+                    "./datasets/cvpr10_multiview_pedestrians/viewpoints_train6.al",
+                    "./datasets/cvpr10_multiview_pedestrians/viewpoints_train7.al",
+                    "./datasets/cvpr10_multiview_pedestrians/viewpoints_train8.al"
+                ],
+                "validation_annotations": [
+                    "./datasets/cvpr10_multiview_pedestrians/viewpoints_validate.al"
+                ],
+                "test_annotations": [
+                    "./datasets/cvpr10_multiview_pedestrians/viewpoints_test.al"
+                ]
+            },
+            "pickle_name": {
+                "train": "./datasets/cvpr10/train_data.pickle",
+                "validation": "./datasets/cvpr10/train_data.pickle",
+                "test": "./datasets/cvpr10/train_data.pickle"
+            }
         },
-        "dataset_annotations": {
-            "train_annotations": [
-                "./datasets/cvpr10_multiview_pedestrians/viewpoints_train1.al",
-                "./datasets/cvpr10_multiview_pedestrians/viewpoints_train2.al",
-                "./datasets/cvpr10_multiview_pedestrians/viewpoints_train3.al",
-                "./datasets/cvpr10_multiview_pedestrians/viewpoints_train4.al",
-                "./datasets/cvpr10_multiview_pedestrians/viewpoints_train5.al",
-                "./datasets/cvpr10_multiview_pedestrians/viewpoints_train6.al",
-                "./datasets/cvpr10_multiview_pedestrians/viewpoints_train7.al",
-                "./datasets/cvpr10_multiview_pedestrians/viewpoints_train8.al"
-            ],
-            "validation_annotations": [
-                "./datasets/cvpr10_multiview_pedestrians/viewpoints_validate.al"
-            ],
-            "test_annotations": [
-                "./datasets/cvpr10_multiview_pedestrians/viewpoints_test.al"
-            ]
-        },
-        "pickle_name": {
-            "train": "./datasets/cvpr10_multiview_pedestrians/train_data.pickle",
-            "validation": "./datasets/cvpr10_multiview_pedestrians/validation_data.pickle",
-            "test": "./datasets/cvpr10_multiview_pedestrians/test_data.pickle"
+        "voc": {
+            "url": "http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar",
+            "path": "./datasets",
+            "folder": "./datasets/VOCdevkit/VOC2012/JPEGImages/",
+            "dataset_images": {
+                "train_folder": "./datasets/VOCdevkit/VOC2012/JPEGImages/",
+                "validation_folder": "./datasets/VOCdevkit/VOC2012/JPEGImages/",
+                "test_folder": "./datasets/VOCdevkit/VOC2012/JPEGImages/"
+            },
+            "dataset_annotations": {
+                "train_annotations": [
+                    "./datasets/VOCdevkit/VOC2012/Annotations/"
+                ],
+                "validation_annotations": [
+                    "./datasets/VOCdevkit/VOC2012/Annotations/"
+                ],
+                "test_annotations": [
+                    "./datasets/VOCdevkit/VOC2012/Annotations/"
+                ]
+            },
+            "pickle_name": {
+                "train": "./datasets/voc/train_data.pickle",
+                "validation": "./datasets/voc/train_data.pickle",
+                "test": "./datasets/voc/train_data.pickle"
+            }
         }
     },
 
