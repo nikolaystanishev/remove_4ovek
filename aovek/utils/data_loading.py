@@ -5,9 +5,17 @@ import numpy as np
 class DataLoading:
 
     def __init__(self, config):
+        self.image_size = config['image_info']['image_size']
+        self.color_channels = config['image_info']['color_channels']
+        self.grid_size = config['label_info']['grid_size']
+        self.number_of_annotations =\
+            config['label_info']['number_of_annotations']
+
         self.train_pickle_names = []
         self.validation_pickle_names = []
         self.test_pickle_names = []
+
+        self.get_datasets(config)
 
         self.train_data = None
         self.train_labels = None
@@ -34,16 +42,19 @@ class DataLoading:
             self.load_pickle(self.test_pickle_names)
 
     def load_pickle(self, pickle_names):
-        data = np.array([])
-        labels = np.array([])
+        data = np.ndarray(shape=(0, self.image_size, self.image_size,
+                                 self.color_channels), dtype=np.float32)
+        labels = np.ndarray(shape=(0, self.grid_size, self.grid_size,
+                                   (1 + self.number_of_annotations)),
+                            dtype=np.float32)
 
         for pickle_name in pickle_names:
             new_data, new_labels = self.get_data_from_pickle(pickle_name)
 
             data =\
-                np.vstack((data, new_data))
+                np.concatenate((data, new_data))
             labels =\
-                np.vstack((labels, new_labels))
+                np.concatenate((labels, new_labels))
 
         return data, labels
 
