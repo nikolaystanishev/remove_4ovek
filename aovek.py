@@ -38,18 +38,27 @@ optional.add_argument('-process_video', metavar='VIDEO',
 
 
 def dataset_download(config):
-    download_dataset(config)
+    datasets = config['dataset']['dataset']
+
+    for dataset in datasets:
+        url = config['dataset'][dataset]['url']
+        path = config["dataset"][dataset]["path"]
+
+        download_dataset(url, path)
 
 
 def processes_dataset(config):
-    if 'cvpr10' in config['dataset']['dataset']:
-        dp = CVPR10Processing(config)
-    elif 'voc' in config['dataset']['dataset']:
-        dp = VOCProcessing(config)
+    datasets = config['dataset']['dataset']
 
-    dp.pickle_dataset()
+    for dataset in datasets:
+        if dataset == 'cvpr10':
+            dataset_process = CVPR10Processing(config)
+        elif dataset == 'voc':
+            dataset_process = VOCProcessing(config)
 
-    print('Taken time: {}'.format(str(dp.get_time())))
+        dataset_process.pickle_dataset()
+
+        print('Taken time: {}'.format(str(dataset_process.get_time())))
 
 
 def train(config):
