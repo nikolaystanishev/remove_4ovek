@@ -26,6 +26,8 @@ conda env remove –name aovek
 ```
 ## Process dataset and train CNN for object detection
 File aovek.py is responsible for controlling CNN for object detection.
+### All possible options of aovek.py
+<p align="center"><img src="./images/options.png" /></p>
 ### Download dataset, Process dataset, Train CNN for object detection
 ```bash
 python3 aovek.py -config_file ./config.json -dataset_download -processes_dataset -train
