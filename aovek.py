@@ -1,5 +1,6 @@
 import argparse
 import json
+from PIL import Image
 
 from aovek.preprocess.download_dataset import download_dataset
 from aovek.preprocess.cvpr10_processing import CVPR10Processing
@@ -7,6 +8,8 @@ from aovek.preprocess.voc_processing import VOCProcessing
 from aovek.training.train import Train
 from aovek.visualization.predict import Predict
 from aovek.validate.eval_metrics import EvalMetrics
+from aovek.video.video_to_image import VideoToImage
+
 
 parser = argparse.ArgumentParser(description='''
 4ovek:
@@ -30,6 +33,8 @@ optional.add_argument('-predict', help='Make predictions for entire dataset.',
                       action='store_true')
 optional.add_argument('-evaluate', help='Evaluate trained model.',
                       action='store_true')
+optional.add_argument('-process_video', metavar='VIDEO',
+                      help='Make photo without people from video')
 
 
 def dataset_download(config):
@@ -63,6 +68,16 @@ def evaluate(config):
     eval_metrics.eval_pickles_metrics()
 
 
+def process_video(config, video_path):
+    video_processing = VideoToImage(config)
+    image_array = video_processing.process_video_file(video_path)
+
+    image_filename = video_path.split('/')[-1].rsplit('.', 1)[0] + '.png'
+
+    image = Image.fromarray(image_array)
+    image.save(image_filename)
+
+
 if __name__ == '__main__':
     args = parser.parse_args()
 
@@ -81,3 +96,5 @@ if __name__ == '__main__':
         predict(config)
     elif args.evaluate:
         evaluate(config)
+    elif args.process_video:
+        process_video(config, args.process_video)
