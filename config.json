@@ -30,8 +30,8 @@
             },
             "pickle_name": {
                 "train": "./datasets/cvpr10/train_data.pickle",
-                "validation": "./datasets/cvpr10/train_data.pickle",
-                "test": "./datasets/cvpr10/train_data.pickle"
+                "validation": "./datasets/cvpr10/validation_data.pickle",
+                "test": "./datasets/cvpr10/test_data.pickle"
             }
         },
         "voc": {
@@ -56,8 +56,8 @@
             },
             "pickle_name": {
                 "train": "./datasets/voc/train_data.pickle",
-                "validation": "./datasets/voc/train_data.pickle",
-                "test": "./datasets/voc/train_data.pickle"
+                "validation": "./datasets/voc/validation_data.pickle",
+                "test": "./datasets/voc/test_data.pickle"
             }
         }
     },
