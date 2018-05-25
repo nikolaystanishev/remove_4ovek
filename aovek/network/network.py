@@ -5,7 +5,7 @@ from keras.layers import Input, Conv2D, MaxPooling2D, Reshape,\
     BatchNormalization, LeakyReLU
 from keras.models import load_model
 from keras.models import model_from_json
-from keras.callbacks import History
+from keras.callbacks import History, ModelCheckpoint
 from keras.optimizers import SGD, RMSprop, Adagrad, Adadelta, Adam, Adamax,\
     Nadam
 from keras.initializers import RandomNormal
@@ -55,6 +55,8 @@ class YOLO:
             config['network']['model_binary_data_file']
         self.model_json_structure_file =\
             config['network']['json_model_structure']
+        self.model_checkpoint_binary_data_file =\
+            config['network']['model_checkpoint_binary_data_file']
 
         self.iou_threshold = config['network']['predict']['iou_threshold']
         self.prob_threshold = config['network']['predict']['prob_threshold']
@@ -269,12 +271,16 @@ class YOLO:
         self.metrics = ModelMetrics(validation_data, validation_labels,
                                     self)
 
+        model_checkpoint = ModelCheckpoint(
+            self.model_checkpoint_binary_data_file, monitor='val_loss')
+
         self.model.fit(train_data, train_labels,
                        batch_size=self.batch_size,
                        epochs=self.number_of_epochs,
                        validation_data=(validation_data, validation_labels),
                        shuffle=True,
-                       callbacks=[self.history, self.metrics])
+                       callbacks=[self.history, self.metrics,
+                                  model_checkpoint])
 
     def custom_loss(self, true, pred):
         loss = tf.Variable(0, dtype=tf.float32)

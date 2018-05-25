@@ -86,6 +86,7 @@
         "model_binary_data_file": "./models/model.h5",
         "results_file": "./results/results.txt",
         "json_model_structure": "./models/model.json",
+        "model_checkpoint_binary_data_file": "./models/checkpoints/model.{epoch:02d}-{val_loss:.8f}.h5",
         "train": {
             "batch_size": 16,
             "number_of_epochs": 30,
