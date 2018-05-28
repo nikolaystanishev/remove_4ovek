@@ -2,7 +2,7 @@ import tensorflow as tf
 from keras import backend as K
 from keras.models import Model
 from keras.layers import Input, Conv2D, MaxPooling2D, Reshape,\
-    BatchNormalization, LeakyReLU
+    BatchNormalization, LeakyReLU, Dropout
 from keras.models import load_model
 from keras.models import model_from_json
 from keras.callbacks import History, ModelCheckpoint
@@ -222,6 +222,7 @@ class YOLO:
                          use_bias=True)(network)
         network = BatchNormalization(name='norm_14')(network)
         network = LeakyReLU(alpha=0.1, name='relu_14')(network)
+        network = Dropout(rate=0.5, name='drop_1')(network)
 
         network = Conv2D(filters=1024,
                          kernel_size=(3, 3),
@@ -232,6 +233,7 @@ class YOLO:
                          use_bias=True)(network)
         network = BatchNormalization(name='norm_15')(network)
         network = LeakyReLU(alpha=0.1, name='relu_15')(network)
+        network = Dropout(rate=0.5, name='drop_2')(network)
 
         network = Conv2D(filters=(self.number_of_annotations + 1),
                          kernel_size=(1, 1),
