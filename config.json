@@ -76,10 +76,10 @@
     },
 
     "video_info": {
-        "up_offset": 1,
-        "down_offset": 1,
-        "left_offset": 1,
-        "right_offset": 1
+        "up_offset": 0.4,
+        "down_offset": 1.5,
+        "left_offset": 0.75,
+        "right_offset": 1.25
     },
 
     "network": {
